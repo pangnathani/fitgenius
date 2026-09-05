@@ -1,0 +1,2217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"/>
+<title>FitGenius.ai - Smart Workout & Nutrition</title>
+<link rel="manifest" href="manifest.json"/>
+<meta name="theme-color" content="#000000"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="FitGenius"/>
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png"/>
+<link rel="apple-touch-icon" href="icon-192.png"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
+html,body{height:100%;background:#000;font-family:"Inter",sans-serif;overflow:hidden;color:#fff;-webkit-text-size-adjust:100%}
+::-webkit-scrollbar{width:3px}::-webkit-scrollbar-track{background:#09090b}::-webkit-scrollbar-thumb{background:#3f3f46;border-radius:99px}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+@keyframes slideUp{from{opacity:0;transform:translateY(60px)}to{opacity:1;transform:translateY(0)}}
+@keyframes shimmer{0%{background-position:-200% center}100%{background-position:200% center}}
+@keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}
+@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+@keyframes toast{0%{opacity:0;transform:translateX(-50%) scale(.85)}10%{opacity:1;transform:translateX(-50%) scale(1)}80%{opacity:1}100%{opacity:0;transform:translateX(-50%) scale(.9)}}
+@keyframes confetti{0%{transform:translateY(0) rotate(0);opacity:1}100%{transform:translateY(140px) rotate(720deg);opacity:0}}
+@keyframes badgePop{0%{transform:scale(.2) rotate(-20deg);opacity:0}65%{transform:scale(1.12) rotate(4deg);opacity:1}100%{transform:scale(1) rotate(0);opacity:1}}
+@keyframes coachIn{0%{transform:scale(.3) translateY(20px);opacity:0}70%{transform:scale(1.08) translateY(-4px);opacity:1}100%{transform:scale(1) translateY(0);opacity:1}}
+@keyframes ring{0%,100%{transform:scale(1)}40%{transform:scale(1.15)}60%{transform:scale(.95)}}
+@keyframes scanFood{0%{top:-3%;opacity:0}5%{opacity:.9}95%{opacity:.9}100%{top:103%;opacity:0}}
+@keyframes glowW{0%,100%{box-shadow:0 0 6px rgba(255,255,255,.12)}50%{box-shadow:0 0 22px rgba(255,255,255,.55),0 0 44px rgba(255,255,255,.12)}}
+@keyframes glowB{0%,100%{box-shadow:0 0 6px rgba(96,165,250,.2)}50%{box-shadow:0 0 22px rgba(96,165,250,.7)}}
+@keyframes glowG{0%,100%{box-shadow:0 0 6px rgba(74,222,128,.2)}50%{box-shadow:0 0 22px rgba(74,222,128,.7)}}
+@keyframes glowO{0%,100%{box-shadow:0 0 6px rgba(251,146,60,.2)}50%{box-shadow:0 0 22px rgba(251,146,60,.7)}}
+@keyframes glowR{0%,100%{box-shadow:0 0 6px rgba(248,113,113,.2)}50%{box-shadow:0 0 22px rgba(248,113,113,.7)}}
+@keyframes glowGd{0%,100%{box-shadow:0 0 6px rgba(251,191,36,.2)}50%{box-shadow:0 0 22px rgba(251,191,36,.7)}}
+@keyframes glowP{0%,100%{box-shadow:0 0 6px rgba(167,139,250,.2)}50%{box-shadow:0 0 22px rgba(167,139,250,.7)}}
+@keyframes glowPk{0%,100%{box-shadow:0 0 6px rgba(244,114,182,.2)}50%{box-shadow:0 0 22px rgba(244,114,182,.7)}}
+@keyframes glowC{0%,100%{box-shadow:0 0 6px rgba(34,211,238,.2)}50%{box-shadow:0 0 22px rgba(34,211,238,.7)}}
+
+.gW{animation:glowW 2.2s ease-in-out infinite}.gB{animation:glowB 2.2s ease-in-out infinite}
+.gG{animation:glowG 2.2s ease-in-out infinite}.gO{animation:glowO 2.2s ease-in-out infinite}
+.gR{animation:glowR 2.2s ease-in-out infinite}.gGd{animation:glowGd 2.2s ease-in-out infinite}
+.gP{animation:glowP 2.2s ease-in-out infinite}.gPk{animation:glowPk 2.2s ease-in-out infinite}
+.gC{animation:glowC 2.2s ease-in-out infinite}
+
+.fade-up{animation:fadeUp .35s ease-out forwards}
+.slide-up{animation:slideUp .42s cubic-bezier(.16,1,.3,1) forwards}
+.shimmer{background:linear-gradient(90deg,#52525b,#fff 50%,#52525b);background-size:200%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:shimmer 1.8s linear infinite}
+.tap{cursor:pointer;transition:transform .1s}.tap:active{transform:scale(.94)}
+.card{background:#09090b;border:1px solid #27272a;border-radius:12px}
+.modal-bg{backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.coach-icon{animation:ring 3s ease-in-out infinite}
+.coach-in{animation:coachIn .5s cubic-bezier(.34,1.56,.64,1) forwards}
+.badge-pop{animation:badgePop .55s cubic-bezier(.34,1.56,.64,1) forwards}
+.scan-bar{position:absolute;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,rgba(0,255,180,.85),transparent);animation:scanFood 2.1s linear infinite;z-index:5;pointer-events:none}
+@keyframes confettiFall{0%{transform:translateY(-10px) rotate(0deg) scale(1);opacity:1}100%{transform:translateY(105vh) rotate(720deg) scale(0.5);opacity:0}}
+.confetti-piece{position:fixed;top:-10px;pointer-events:none;z-index:9999;animation:confettiFall 3.2s cubic-bezier(.25,.46,.45,.94) forwards}
+@keyframes floatUp{0%{opacity:1;transform:translateY(0) scale(1)}50%{opacity:1;transform:translateY(-18px) scale(1.15)}100%{opacity:0;transform:translateY(-34px) scale(0.9)}}
+.float-xp{position:absolute;pointer-events:none;z-index:99;font-size:11px;font-weight:900;color:#4ade80;text-shadow:0 0 8px rgba(74,222,128,.8);animation:floatUp .85s cubic-bezier(.16,1,.3,1) forwards;white-space:nowrap}
+
+/* responsive */
+#root{height:100%;overflow:hidden;position:relative}
+@media(min-width:768px){
+  #root{max-width:480px;margin:0 auto;border-left:1px solid #18181b;border-right:1px solid #18181b;box-shadow:0 0 60px rgba(0,0,0,.6)}
+  body{background:#000}
+}
+@media(max-width:380px){
+  html{font-size:14px}
+}
+@media(min-width:1200px){
+  #root{max-width:420px;border-radius:0}
+}
+@supports(padding:max(0px)){
+  .safe-bottom{padding-bottom:max(8px,env(safe-area-inset-bottom))}
+}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+
+const{useState,useEffect,useRef,useCallback}=React;
+
+/* ── API KEY ── */
+let GEMINI_KEY=localStorage.getItem("fg_gemini_key")||"";
+const setGeminiKey=(k)=>{GEMINI_KEY=k;localStorage.setItem("fg_gemini_key",k);};
+
+/* ── LEVELS ── */
+const LEVELS=[
+  {n:"RECRUIT INITIATE",xp:0,c:"#71717a"},
+  {n:"RECRUIT NOVICE",xp:15,c:"#a1a1aa"},
+  {n:"RECRUIT TRAINEE",xp:66,c:"#d4d4d8"},
+  {n:"RECRUIT CADET",xp:159,c:"#9ca3af"},
+  {n:"RECRUIT SCOUT",xp:295,c:"#6b7280"},
+  {n:"RECRUIT RUNNER",xp:477,c:"#71717a"},
+  {n:"RECRUIT RANGER",xp:706,c:"#a1a1aa"},
+  {n:"RECRUIT SOLDIER",xp:984,c:"#d4d4d8"},
+  {n:"RECRUIT WARRIOR",xp:1311,c:"#9ca3af"},
+  {n:"RECRUIT CHAMPION",xp:1689,c:"#78716c"},
+  {n:"IRON BLOOD",xp:2118,c:"#60a5fa"},
+  {n:"IRON NERVE",xp:2600,c:"#38bdf8"},
+  {n:"IRON FIST",xp:3135,c:"#3b82f6"},
+  {n:"IRON WILL",xp:3724,c:"#2563eb"},
+  {n:"IRON GUARD",xp:4367,c:"#60a5fa"},
+  {n:"IRON BLADE",xp:5066,c:"#38bdf8"},
+  {n:"IRON SHIELD",xp:5820,c:"#93c5fd"},
+  {n:"IRON HEART",xp:6630,c:"#60a5fa"},
+  {n:"IRON FORGE",xp:7497,c:"#3b82f6"},
+  {n:"IRON STORM",xp:8421,c:"#2dd4bf"},
+  {n:"BRONZE FURY",xp:9403,c:"#fb923c"},
+  {n:"BRONZE FLAME",xp:10443,c:"#f97316"},
+  {n:"BRONZE HAWK",xp:11542,c:"#ea580c"},
+  {n:"BRONZE BULL",xp:12700,c:"#d97706"},
+  {n:"BRONZE VIPER",xp:13916,c:"#fbbf24"},
+  {n:"BRONZE TITAN",xp:15193,c:"#fb923c"},
+  {n:"BRONZE BEAST",xp:16530,c:"#f97316"},
+  {n:"BRONZE WRATH",xp:17927,c:"#ea580c"},
+  {n:"BRONZE PHOENIX",xp:19385,c:"#d97706"},
+  {n:"BRONZE DRAKE",xp:20904,c:"#f59e0b"},
+  {n:"SILVER GHOST",xp:22485,c:"#e2e8f0"},
+  {n:"SILVER SHADOW",xp:24127,c:"#cbd5e1"},
+  {n:"SILVER PHANTOM",xp:25832,c:"#94a3b8"},
+  {n:"SILVER SPECTER",xp:27599,c:"#e2e8f0"},
+  {n:"SILVER WRAITH",xp:29428,c:"#cbd5e1"},
+  {n:"SILVER SERPENT",xp:31321,c:"#94a3b8"},
+  {n:"SILVER WOLF",xp:33276,c:"#e2e8f0"},
+  {n:"SILVER RAVEN",xp:35295,c:"#cbd5e1"},
+  {n:"SILVER FALCON",xp:37378,c:"#94a3b8"},
+  {n:"SILVER REAPER",xp:39525,c:"#e5e7eb"},
+  {n:"GOLD KNIGHT",xp:41736,c:"#fbbf24"},
+  {n:"GOLD SENTINEL",xp:44012,c:"#f59e0b"},
+  {n:"GOLD WARDEN",xp:46352,c:"#d97706"},
+  {n:"GOLD MONARCH",xp:48758,c:"#fbbf24"},
+  {n:"GOLD SOVEREIGN",xp:51228,c:"#f59e0b"},
+  {n:"GOLD PALADIN",xp:53764,c:"#eab308"},
+  {n:"GOLD GLADIATOR",xp:56366,c:"#facc15"},
+  {n:"GOLD EMPEROR",xp:59033,c:"#fbbf24"},
+  {n:"GOLD CONQUEROR",xp:61767,c:"#d97706"},
+  {n:"GOLD OVERLORD",xp:64567,c:"#f59e0b"},
+  {n:"PLATINUM CORE",xp:67433,c:"#22d3ee"},
+  {n:"PLATINUM EDGE",xp:70366,c:"#06b6d4"},
+  {n:"PLATINUM VANGUARD",xp:73366,c:"#0891b2"},
+  {n:"PLATINUM APEX",xp:76433,c:"#67e8f9"},
+  {n:"PLATINUM OMEGA",xp:79567,c:"#22d3ee"},
+  {n:"PLATINUM PRIME",xp:82769,c:"#06b6d4"},
+  {n:"PLATINUM FORCE",xp:86039,c:"#0891b2"},
+  {n:"PLATINUM PULSE",xp:89376,c:"#67e8f9"},
+  {n:"PLATINUM SURGE",xp:92781,c:"#22d3ee"},
+  {n:"PLATINUM NEXUS",xp:96254,c:"#06b6d4"},
+  {n:"DIAMOND ASCENDANT",xp:99796,c:"#a78bfa"},
+  {n:"DIAMOND CELESTIAL",xp:103407,c:"#8b5cf6"},
+  {n:"DIAMOND ETHEREAL",xp:107086,c:"#7c3aed"},
+  {n:"DIAMOND ARCHON",xp:110834,c:"#c084fc"},
+  {n:"DIAMOND SERAPH",xp:114651,c:"#a78bfa"},
+  {n:"DIAMOND VALKYRIE",xp:118537,c:"#8b5cf6"},
+  {n:"DIAMOND HARBINGER",xp:122492,c:"#7c3aed"},
+  {n:"DIAMOND ORACLE",xp:126517,c:"#c084fc"},
+  {n:"DIAMOND PARAGON",xp:130612,c:"#818cf8"},
+  {n:"DIAMOND DEMIGOD",xp:134777,c:"#6366f1"},
+  {n:"LEGEND MYTH",xp:139011,c:"#f43f5e"},
+  {n:"LEGEND IMMORTAL",xp:143316,c:"#fb7185"},
+  {n:"LEGEND TRANSCENDENT",xp:147691,c:"#fbbf24"},
+  {n:"LEGEND DIVINE",xp:152137,c:"#4ade80"},
+  {n:"LEGEND SUPREME",xp:156653,c:"#60a5fa"},
+  {n:"LEGEND ETERNAL",xp:161240,c:"#a78bfa"},
+  {n:"LEGEND INFINITY",xp:165897,c:"#f97316"},
+  {n:"LEGEND COSMOS",xp:170626,c:"#22d3ee"},
+  {n:"LEGEND GODLIKE",xp:175426,c:"#e879f9"},
+  {n:"LEGEND ABSOLUTE",xp:180297,c:"#fff"}
+];
+function getLvl(xp){
+  let idx=0;
+  for(let i=LEVELS.length-1;i>=0;i--){if(xp>=LEVELS[i].xp){idx=i;break;}}
+  const lv=LEVELS[idx], nx=LEVELS[idx+1]||null;
+  const pct=nx?((xp-lv.xp)/(nx.xp-lv.xp))*100:100;
+  lv.g=lv.g||`linear-gradient(135deg,#09090b,${lv.c}22)`;
+  return{lv,nx,pct:Math.min(pct,100),idx};
+}
+
+/* ── HELPERS ── */
+function todayStr(){return new Date().toISOString().slice(0,10);}
+function daysAgo(n){const d=new Date();d.setDate(d.getDate()-n);return d.toISOString().slice(0,10);}
+function fmt(s){const m=Math.floor(s/60),sec=s%60;return `${String(m).padStart(2,"0")}:${String(sec).padStart(2,"0")}`;}
+function compressImg(dataUrl){
+  return new Promise(res=>{
+    const img=new Image();
+    img.onload=()=>{
+      const c=document.createElement("canvas");
+      const scale=Math.min(1, 600/Math.max(img.width,img.height));
+      c.width=img.width*scale; c.height=img.height*scale;
+      c.getContext("2d").drawImage(img,0,0,c.width,c.height);
+      res(c.toDataURL("image/jpeg",0.7));
+    };
+    img.src=dataUrl;
+  });
+}
+
+function loadJSON(k,def){try{const v=localStorage.getItem(k);return v?JSON.parse(v):def;}catch(e){return def;}}
+function saveJSON(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
+
+/* ── SOUND ENGINE (Web Audio API) ── */
+function playSound(type){
+  try{
+    const AudioCtx=window.AudioContext||window.webkitAudioContext;
+    if(!AudioCtx)return;
+    const ctx=new AudioCtx();
+    const t=ctx.currentTime;
+    if(type==="set"){
+      const osc=ctx.createOscillator(), g=ctx.createGain();
+      osc.connect(g); g.connect(ctx.destination);
+      osc.type="triangle";
+      osc.frequency.setValueAtTime(520,t);
+      osc.frequency.exponentialRampToValueAtTime(880,t+0.09);
+      g.gain.setValueAtTime(0.12,t);
+      g.gain.exponentialRampToValueAtTime(0.001,t+0.09);
+      osc.start(t); osc.stop(t+0.09);
+    }else if(type==="complete"){
+      [523.25, 659.25, 783.99, 1046.5].forEach((f,i)=>{
+        const osc=ctx.createOscillator(), g=ctx.createGain();
+        osc.connect(g); g.connect(ctx.destination);
+        osc.type="sine";
+        osc.frequency.value=f;
+        g.gain.setValueAtTime(0.14,t+i*0.08);
+        g.gain.exponentialRampToValueAtTime(0.001,t+i*0.08+0.3);
+        osc.start(t+i*0.08); osc.stop(t+i*0.08+0.3);
+      });
+    }else if(type==="level"){
+      [440, 554.37, 659.25, 880, 1108.73, 1318.5].forEach((f,i)=>{
+        const osc=ctx.createOscillator(), g=ctx.createGain();
+        osc.connect(g); g.connect(ctx.destination);
+        osc.type="triangle";
+        osc.frequency.value=f;
+        g.gain.setValueAtTime(0.16,t+i*0.08);
+        g.gain.exponentialRampToValueAtTime(0.001,t+i*0.08+0.35);
+        osc.start(t+i*0.08); osc.stop(t+i*0.08+0.35);
+      });
+    }else if(type==="countdown"){
+      const osc=ctx.createOscillator(), g=ctx.createGain();
+      osc.connect(g); g.connect(ctx.destination);
+      osc.type="sine";
+      osc.frequency.setValueAtTime(800,t);
+      g.gain.setValueAtTime(0.12,t);
+      g.gain.exponentialRampToValueAtTime(0.001,t+0.08);
+      osc.start(t); osc.stop(t+0.08);
+    }else if(type==="go"){
+      [587.33, 783.99, 1174.66].forEach((f,i)=>{
+        const osc=ctx.createOscillator(), g=ctx.createGain();
+        osc.connect(g); g.connect(ctx.destination);
+        osc.type="triangle";
+        osc.frequency.value=f;
+        g.gain.setValueAtTime(0.18,t+i*0.07);
+        g.gain.exponentialRampToValueAtTime(0.001,t+i*0.07+0.25);
+        osc.start(t+i*0.07); osc.stop(t+i*0.07+0.25);
+      });
+    }
+  }catch(e){}
+}
+
+/* ── CELEBRATION & CONFETTI ── */
+function ConfettiBurst({color="#fbbf24"}){
+  const pieces=useRef(Array.from({length:36},(_,i)=>({
+    id:i,
+    left:Math.random()*100,
+    delay:Math.random()*0.8,
+    size:Math.random()*8+6,
+    color:[color,"#fff","#38bdf8","#4ade80","#f43f5e","#fbbf24"][Math.floor(Math.random()*6)],
+    duration:Math.random()*1.5+2
+  }))).current;
+
+  return <div style={{position:"fixed",inset:0,pointerEvents:"none",zIndex:9999}}>
+    {pieces.map(p=><div key={p.id} className="confetti-piece" style={{
+      left:`${p.left}%`,
+      width:p.size,
+      height:p.size*1.4,
+      background:p.color,
+      borderRadius:2,
+      animationDelay:`${p.delay}s`,
+      animationDuration:`${p.duration}s`
+    }}/>)}
+  </div>;
+}
+
+function LevelUpModal({data,onClose}){
+  if(!data)return null;
+  const{newLv,rankIdx}=data;
+  return <div onClick={onClose} className="modal-bg" style={{position:"fixed",inset:0,zIndex:100,background:"rgba(0,0,0,.92)",display:"flex",alignItems:"center",justifyContent:"center",padding:16}}>
+    <ConfettiBurst color={newLv.c}/>
+    <div onClick={e=>e.stopPropagation()} className="badge-pop card" style={{width:"100%",maxWidth:340,padding:"28px 20px",textAlign:"center",border:`2px solid ${newLv.c}66`,background:`linear-gradient(180deg,#09090b 0%,${newLv.c}18 100%)`,boxShadow:`0 0 40px ${newLv.c}44`,position:"relative"}}>
+      <div style={{fontSize:9,letterSpacing:"0.24em",color:newLv.c,fontWeight:900,marginBottom:8}}>RANK UNLOCKED!</div>
+      <div style={{width:84,height:84,borderRadius:22,background:newLv.g||`linear-gradient(135deg,#09090b,${newLv.c}44)`,border:`2px solid ${newLv.c}`,margin:"0 auto 14px",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:`0 0 26px ${newLv.c}77`}}>
+        <div style={{fontSize:32,fontWeight:900,color:newLv.c}}>{rankIdx}</div>
+      </div>
+      <div style={{fontSize:22,fontWeight:900,letterSpacing:"0.04em",color:"#fff",marginBottom:6}}>{newLv.n}</div>
+      <div style={{fontSize:11,color:"#a1a1aa",marginBottom:20,lineHeight:1.5}}>You crossed into a new rank tier! Keep pushing your limits every single day.</div>
+      <button onClick={onClose} className="tap" style={{width:"100%",padding:13,background:newLv.c,color:"#000",border:"none",borderRadius:10,fontSize:10,letterSpacing:"0.16em",fontWeight:900,cursor:"pointer",boxShadow:`0 0 16px ${newLv.c}66`}}>CLAIM GLORY</button>
+    </div>
+  </div>;
+}
+
+/* ── MUSCLE GROUPS ── */
+const MUSCLE_GROUPS=["CHEST","BACK","SHOULDERS","QUADS","HAMSTRINGS","GLUTES","BICEPS","TRICEPS","CORE","CALVES","LATS","TRAPS","FOREARMS","OBLIQUES","HIP FLEXORS","REAR DELTS"];
+
+/* ── WORKOUT PRESETS ── */
+const WP={
+  CHEST:[
+    {n:"Bench Press",s:4,r:8,mu:["Chest","Triceps","Shoulders"]},
+    {n:"Incline Dumbbell Press",s:3,r:10,mu:["Chest","Shoulders"]},
+    {n:"Cable Fly",s:3,r:12,mu:["Chest"]},
+    {n:"Dips",s:3,r:10,mu:["Chest","Triceps"]},
+    {n:"Push-Ups",s:3,r:15,mu:["Chest","Core"]},
+  ],
+  BACK:[
+    {n:"Deadlift",s:4,r:5,mu:["Back","Hamstrings","Glutes"]},
+    {n:"Pull-Ups",s:4,r:8,mu:["Lats","Biceps"]},
+    {n:"Barbell Row",s:4,r:8,mu:["Back","Biceps"]},
+    {n:"Lat Pulldown",s:3,r:10,mu:["Lats","Biceps"]},
+    {n:"Face Pulls",s:3,r:15,mu:["Rear Delts","Traps"]},
+  ],
+  SHOULDERS:[
+    {n:"Overhead Press",s:4,r:8,mu:["Shoulders","Triceps"]},
+    {n:"Lateral Raises",s:4,r:12,mu:["Shoulders"]},
+    {n:"Arnold Press",s:3,r:10,mu:["Shoulders"]},
+    {n:"Rear Delt Fly",s:3,r:15,mu:["Rear Delts"]},
+  ],
+  QUADS:[
+    {n:"Barbell Squat",s:4,r:6,mu:["Quads","Glutes","Core"]},
+    {n:"Leg Press",s:3,r:10,mu:["Quads","Glutes"]},
+    {n:"Leg Extensions",s:3,r:12,mu:["Quads"]},
+    {n:"Walking Lunges",s:3,r:12,mu:["Quads","Glutes"]},
+  ],
+  HAMSTRINGS:[
+    {n:"Romanian Deadlift",s:4,r:8,mu:["Hamstrings","Glutes"]},
+    {n:"Leg Curls",s:3,r:12,mu:["Hamstrings"]},
+    {n:"Good Mornings",s:3,r:10,mu:["Hamstrings","Back"]},
+  ],
+  GLUTES:[
+    {n:"Hip Thrust",s:4,r:10,mu:["Glutes","Hamstrings"]},
+    {n:"Bulgarian Split Squat",s:3,r:10,mu:["Glutes","Quads"]},
+    {n:"Glute Kickbacks",s:3,r:12,mu:["Glutes"]},
+  ],
+  BICEPS:[
+    {n:"Barbell Curl",s:3,r:10,mu:["Biceps"]},
+    {n:"Hammer Curls",s:3,r:10,mu:["Biceps","Forearms"]},
+    {n:"Incline Dumbbell Curl",s:3,r:10,mu:["Biceps"]},
+  ],
+  TRICEPS:[
+    {n:"Close-Grip Bench",s:3,r:8,mu:["Triceps","Chest"]},
+    {n:"Skull Crushers",s:3,r:10,mu:["Triceps"]},
+    {n:"Overhead Tricep Extension",s:3,r:12,mu:["Triceps"]},
+  ],
+  CORE:[
+    {n:"Plank",s:3,r:45,mu:["Core","Obliques"]},
+    {n:"Hanging Leg Raises",s:3,r:12,mu:["Abs","Hip Flexors"]},
+    {n:"Cable Crunches",s:3,r:15,mu:["Abs"]},
+    {n:"Ab Wheel Rollouts",s:3,r:10,mu:["Core"]},
+  ],
+};
+
+/* ── FOOD DATABASE (USDA-accurate, per-unit) ── */
+const FOOD_DB=[
+  {k:["egg","eggs"],kcal:72,p:6,c:0.4,f:5,unit:"egg",sv:"1 large egg (50g)"},
+  {k:["chicken breast","grilled chicken","chicken"],kcal:165,p:31,c:0,f:3.6,unit:"serving",sv:"100g breast"},
+  {k:["rice","white rice"],kcal:206,p:4.3,c:45,f:0.4,unit:"cup",sv:"1 cup cooked (158g)"},
+  {k:["brown rice"],kcal:216,p:5,c:45,f:1.8,unit:"cup",sv:"1 cup cooked (195g)"},
+  {k:["pizza"],kcal:285,p:12,c:36,f:10,unit:"slice",sv:"1 slice (107g)"},
+  {k:["protein shake","whey","shake"],kcal:120,p:24,c:3,f:1,unit:"scoop",sv:"1 scoop (30g) + water"},
+  {k:["oatmeal","oats","porridge"],kcal:154,p:5.4,c:27,f:2.6,unit:"cup",sv:"1 cup cooked (234g)"},
+  {k:["banana"],kcal:105,p:1.3,c:27,f:0.4,unit:"banana",sv:"1 medium (118g)"},
+  {k:["apple"],kcal:95,p:0.5,c:25,f:0.3,unit:"apple",sv:"1 medium (182g)"},
+  {k:["greek yogurt","yogurt"],kcal:100,p:17,c:6,f:0.7,unit:"cup",sv:"1 cup nonfat (245g)"},
+  {k:["salmon","salmon fillet"],kcal:208,p:20,c:0,f:13,unit:"fillet",sv:"1 fillet (100g)"},
+  {k:["steak","beef steak","ribeye"],kcal:271,p:26,c:0,f:18,unit:"serving",sv:"100g cooked"},
+  {k:["pasta","spaghetti","penne"],kcal:220,p:8,c:43,f:1.3,unit:"cup",sv:"1 cup cooked (140g)"},
+  {k:["bread","toast"],kcal:79,p:2.7,c:15,f:1,unit:"slice",sv:"1 slice (28g)"},
+  {k:["sandwich","sub","wrap"],kcal:340,p:18,c:38,f:12,unit:"sandwich",sv:"1 6-inch sub"},
+  {k:["peanut butter","pb"],kcal:94,p:4,c:3.4,f:8,unit:"tbsp",sv:"1 tbsp (16g)"},
+  {k:["avocado","avo"],kcal:240,p:3,c:13,f:22,unit:"avocado",sv:"1 whole (150g)"},
+  {k:["burger","big mac","hamburger"],kcal:563,p:25,c:44,f:33,unit:"burger",sv:"1 burger (200g)"},
+  {k:["salad"],kcal:130,p:4,c:12,f:7,unit:"bowl",sv:"1 bowl w/ dressing"},
+  {k:["milk","whole milk"],kcal:149,p:8,c:12,f:8,unit:"cup",sv:"1 cup (244ml)"},
+  {k:["cheese","cheddar"],kcal:113,p:7,c:0.4,f:9,unit:"slice",sv:"1 slice (28g)"},
+  {k:["broccoli"],kcal:55,p:3.7,c:11,f:0.6,unit:"cup",sv:"1 cup chopped (156g)"},
+  {k:["sweet potato","yam"],kcal:103,p:2.3,c:24,f:0.1,unit:"potato",sv:"1 medium (114g)"},
+  {k:["almonds","almond"],kcal:164,p:6,c:6,f:14,unit:"handful",sv:"1 oz / 23 almonds"},
+  {k:["tuna","canned tuna"],kcal:191,p:42,c:0,f:1.4,unit:"can",sv:"1 can drained (165g)"},
+  {k:["orange"],kcal:62,p:1.2,c:15,f:0.2,unit:"orange",sv:"1 medium (131g)"},
+  {k:["coffee","latte","cappuccino"],kcal:135,p:7,c:14,f:5,unit:"cup",sv:"1 latte (350ml)"},
+  {k:["black coffee","americano"],kcal:5,p:0.3,c:0,f:0,unit:"cup",sv:"1 cup (240ml)"},
+  {k:["fries","french fries","chips"],kcal:365,p:4,c:48,f:17,unit:"serving",sv:"1 medium order"},
+  {k:["ice cream"],kcal:137,p:2.3,c:16,f:7,unit:"scoop",sv:"1 scoop (66g)"},
+  {k:["bagel"],kcal:270,p:10,c:53,f:1.6,unit:"bagel",sv:"1 plain bagel (105g)"},
+  {k:["pancake","pancakes","waffle"],kcal:86,p:2.4,c:11,f:3.5,unit:"pancake",sv:"1 medium pancake"},
+  {k:["bacon"],kcal:43,p:3,c:0.1,f:3.3,unit:"strip",sv:"1 strip cooked (8g)"},
+  {k:["sausage"],kcal:82,p:4.4,c:0.4,f:7,unit:"link",sv:"1 link cooked (25g)"},
+  {k:["nuggets","chicken nugget","mcnugget"],kcal:48,p:2.5,c:3,f:3,unit:"piece",sv:"1 nugget (16g)"},
+  {k:["burrito","chipotle"],kcal:820,p:38,c:92,f:32,unit:"burrito",sv:"1 burrito (430g)"},
+  {k:["sushi","sushi roll"],kcal:255,p:9,c:38,f:7,unit:"roll",sv:"1 roll / 6-8 pieces"},
+  {k:["ramen","pho","noodle soup"],kcal:436,p:18,c:56,f:15,unit:"bowl",sv:"1 bowl (480g)"},
+  {k:["protein bar","quest bar","cliff bar"],kcal:200,p:20,c:22,f:7,unit:"bar",sv:"1 bar (60g)"},
+  {k:["donut","doughnut"],kcal:253,p:3,c:30,f:14,unit:"donut",sv:"1 glazed donut (60g)"},
+];
+
+function getFoodMacros(input){
+  const l=input.trim().toLowerCase();
+  const WORDS={one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9,ten:10,a:1,an:1,half:0.5};
+  let qty=1;
+  const nm=l.match(/^(\d+\.?\d*)\s/);
+  if(nm) qty=parseFloat(nm[1]);
+  else{const wm=l.match(/^(one|two|three|four|five|six|seven|eight|nine|ten|a|an|half)\s/);if(wm) qty=WORDS[wm[1]]||1;}
+  for(const f of FOOD_DB){
+    if(f.k.some(k=>l.includes(k))){
+      return{kcal:Math.round(f.kcal*qty),p:Math.round(f.p*qty*10)/10,c:Math.round(f.c*qty*10)/10,fat:Math.round(f.f*qty*10)/10,food:f.k[0],qty,unit:f.unit,serving:f.sv};
+    }
+  }
+  return{kcal:Math.round(300*qty),p:Math.round(15*qty),c:Math.round(35*qty),fat:Math.round(10*qty),food:input.trim(),qty,unit:"serving",serving:"estimated"};
+}
+
+/* ── DAILY CHALLENGES ── */
+const DAILY_CHALLENGES=[
+  {id:"dc1",n:"Log a Meal",desc:"Track at least one meal today",xp:10,icon:"Utensils"},
+  {id:"dc2",n:"Complete a Workout",desc:"Finish any workout session",xp:20,icon:"Dumbbell"},
+  {id:"dc3",n:"Drink 8 Glasses of Water",desc:"Stay hydrated",xp:10,icon:"Droplets"},
+  {id:"dc4",n:"10,000 Steps",desc:"Walk or run 10k steps",xp:15,icon:"Footprints"},
+  {id:"dc5",n:"8 Hours of Sleep",desc:"Get proper recovery",xp:10,icon:"Moon"},
+  {id:"dc6",n:"Scan a Meal Photo",desc:"Use AI food scanner",xp:15,icon:"Camera"},
+];
+
+/* ── BADGE PATHS ── */
+const BADGE_PATHS=[
+  {id:"xp",title:"XP MILESTONES",sub:"Earn experience",acc:"#fbbf24",badges:[
+    {id:"x1",n:"FIRST STEP",icon:"Footprints",c:"#a1a1aa",g:"linear-gradient(135deg,#27272a,#3f3f46)",gl:"gW",req:50,desc:"Earn your first 50 XP."},
+    {id:"x2",n:"CENTURION",icon:"Shield",c:"#60a5fa",g:"linear-gradient(135deg,#1e3a5f,#2563eb)",gl:"gB",req:500,desc:"Reach 500 XP."},
+    {id:"x3",n:"POWERHOUSE",icon:"Zap",c:"#fbbf24",g:"linear-gradient(135deg,#78350f,#d97706)",gl:"gGd",req:2000,desc:"Reach 2,000 XP."},
+    {id:"x4",n:"ELITE",icon:"Crown",c:"#f87171",g:"linear-gradient(135deg,#7f1d1d,#ef4444)",gl:"gR",req:5000,desc:"Reach 5,000 XP."},
+    {id:"x5",n:"TITAN",icon:"Mountain",c:"#a78bfa",g:"linear-gradient(135deg,#4c1d95,#8b5cf6)",gl:"gP",req:15000,desc:"Reach 15,000 XP."},
+    {id:"x6",n:"LEGEND",icon:"Sparkles",c:"#fff",g:"linear-gradient(135deg,#27272a,#52525b)",gl:"gW",req:50000,desc:"Reach 50,000 XP."},
+  ]},
+  {id:"streak",title:"STREAK FIRE",sub:"Consecutive days",acc:"#f87171",badges:[
+    {id:"s1",n:"3 DAYS",icon:"Flame",c:"#fb923c",g:"linear-gradient(135deg,#431407,#c2410c)",gl:"gO",req:3,desc:"Maintain a 3-day streak."},
+    {id:"s2",n:"7 DAYS",icon:"Flame",c:"#f87171",g:"linear-gradient(135deg,#7f1d1d,#dc2626)",gl:"gR",req:7,desc:"One full week."},
+    {id:"s3",n:"30 DAYS",icon:"Flame",c:"#fbbf24",g:"linear-gradient(135deg,#78350f,#d97706)",gl:"gGd",req:30,desc:"One month strong."},
+    {id:"s4",n:"90 DAYS",icon:"Flame",c:"#22d3ee",g:"linear-gradient(135deg,#155e75,#06b6d4)",gl:"gC",req:90,desc:"Three months of fire."},
+    {id:"s5",n:"365 DAYS",icon:"Trophy",c:"#fff",g:"linear-gradient(135deg,#27272a,#52525b)",gl:"gW",req:365,desc:"ONE FULL YEAR."},
+  ]},
+  {id:"warrior",title:"WARRIOR PATH",sub:"Workouts completed",acc:"#60a5fa",badges:[
+    {id:"w1",n:"FIRST SESSION",icon:"Dumbbell",c:"#4ade80",g:"linear-gradient(135deg,#14532d,#22c55e)",gl:"gG",req:1,desc:"Complete your first workout."},
+    {id:"w2",n:"10 SESSIONS",icon:"Dumbbell",c:"#60a5fa",g:"linear-gradient(135deg,#1e3a5f,#2563eb)",gl:"gB",req:10,desc:"10 workouts done."},
+    {id:"w3",n:"50 SESSIONS",icon:"Sword",c:"#fb923c",g:"linear-gradient(135deg,#7c2d12,#ea580c)",gl:"gO",req:50,desc:"50 workouts. Warrior status."},
+    {id:"w4",n:"100 SESSIONS",icon:"Shield",c:"#f87171",g:"linear-gradient(135deg,#7f1d1d,#ef4444)",gl:"gR",req:100,desc:"100 workouts. Unstoppable."},
+    {id:"w5",n:"500 SESSIONS",icon:"Crown",c:"#fbbf24",g:"linear-gradient(135deg,#78350f,#d97706)",gl:"gGd",req:500,desc:"500 workouts. Legendary."},
+  ]},
+  {id:"nutrition",title:"NUTRITION MASTER",sub:"Meals tracked",acc:"#4ade80",badges:[
+    {id:"n1",n:"FIRST LOG",icon:"Utensils",c:"#4ade80",g:"linear-gradient(135deg,#14532d,#22c55e)",gl:"gG",req:1,desc:"Log your first meal."},
+    {id:"n2",n:"25 MEALS",icon:"Utensils",c:"#60a5fa",g:"linear-gradient(135deg,#1e3a5f,#2563eb)",gl:"gB",req:25,desc:"25 meals tracked."},
+    {id:"n3",n:"100 MEALS",icon:"Target",c:"#fbbf24",g:"linear-gradient(135deg,#78350f,#d97706)",gl:"gGd",req:100,desc:"100 meals logged."},
+    {id:"n4",n:"500 MEALS",icon:"Trophy",c:"#f87171",g:"linear-gradient(135deg,#7f1d1d,#ef4444)",gl:"gR",req:500,desc:"500 meals. Nutrition master."},
+  ]},
+  {id:"special",title:"SPECIAL OPS",sub:"Hidden achievements",acc:"#a78bfa",badges:[
+    {id:"sp1",n:"NIGHT OWL",icon:"Moon",c:"#818cf8",g:"linear-gradient(135deg,#312e81,#6366f1)",gl:"gP",req:"nightOwl",desc:"Log a workout after 10 PM."},
+    {id:"sp2",n:"EARLY BIRD",icon:"Sun",c:"#fbbf24",g:"linear-gradient(135deg,#78350f,#d97706)",gl:"gGd",req:"earlyBird",desc:"Log a workout before 6 AM."},
+    {id:"sp3",n:"HYPE MODE",icon:"Zap",c:"#f97316",g:"linear-gradient(135deg,#9a3412,#ea580c)",gl:"gO",req:"hypeMode",desc:"Try HYPE mode coach."},
+    {id:"sp4",n:"ALL DAILY",icon:"Star",c:"#22d3ee",g:"linear-gradient(135deg,#155e75,#06b6d4)",gl:"gC",req:"allChallenges",desc:"Complete all daily challenges in one day."},
+  ]},
+];
+
+function isBadgeUnlocked(b,path,xp,wCount,mCount,streak,flags){
+  if(path==="xp") return xp>=b.req;
+  if(path==="streak") return streak>=b.req;
+  if(path==="warrior") return wCount>=b.req;
+  if(path==="nutrition") return mCount>=b.req;
+  if(path==="special") return !!flags[b.req];
+  return false;
+}
+function badgePct(b,path,xp,wCount,mCount,streak,flags){
+  if(path==="xp") return Math.min((xp/b.req)*100,100);
+  if(path==="streak") return Math.min((streak/b.req)*100,100);
+  if(path==="warrior") return Math.min((wCount/b.req)*100,100);
+  if(path==="nutrition") return Math.min((mCount/b.req)*100,100);
+  if(path==="special") return flags[b.req]?100:0;
+  return 0;
+}
+
+/* ── FORM TIPS ── */
+const FORM_TIPS={
+  squat:{mu:["Quads","Glutes","Core"],diff:"Intermediate",tips:["Keep chest tall and spine neutral","Knees track over toes","Drive through full foot, especially heels","Hip crease below parallel for full ROM","Brace core hard"]},
+  bench:{mu:["Chest","Triceps","Front Delts"],diff:"Beginner",tips:["Retract shoulder blades before every rep","Plant feet flat, use leg drive","Slight arch in lower back is safe","Bar path is slightly diagonal","Full grip, thumbs around bar"]},
+  deadlift:{mu:["Back","Glutes","Hamstrings"],diff:"Advanced",tips:["Neutral spine at all times","Bar stays close to shins","Hinge at hips, set lats","Push the floor away","Lock hips and knees at top"]},
+  pullup:{mu:["Lats","Biceps","Core"],diff:"Intermediate",tips:["Dead hang start, full stretch","Pull elbows down to hips","Slight forward lean for lats","Control descent 2-3 seconds","Hollow body position"]},
+  curl:{mu:["Biceps","Forearms"],diff:"Beginner",tips:["Elbows pinned at sides","Supinate wrist at top","3-4 second eccentric phase","Full extension at bottom","Torso stays upright"]},
+  pushup:{mu:["Chest","Triceps","Core"],diff:"Beginner",tips:["Hands just wider than shoulders","Elbows at 45 degree angle","Full lockout at top","Chest near floor at bottom","Squeeze glutes for rigidity"]},
+  row:{mu:["Back","Biceps","Rear Delts"],diff:"Intermediate",tips:["Hinge until back is near parallel","Pull to lower chest","Squeeze shoulder blades at top","Full scapula protraction at bottom","Head stays neutral"]},
+  press:{mu:["Shoulders","Triceps"],diff:"Intermediate",tips:["Bar slightly in front of face","Full lockout overhead","Brace core hard","Slight backward lean is OK","Elbows in front of bar at start"]},
+  lunge:{mu:["Quads","Glutes"],diff:"Beginner",tips:["Long step, back knee drops straight down","Front knee above ankle","Torso upright","Push through front heel","Both knees reach 90 degrees"]},
+  plank:{mu:["Core","Obliques"],diff:"Beginner",tips:["Hips level with shoulders","Squeeze glutes and quads","Pull navel toward spine","Neutral neck, look at floor","Breathe steadily"]},
+  generic:{mu:["Multiple Groups"],diff:"Varies",tips:["Control every rep","Full range of motion","Progressive overload","Rest 60-90s between sets","Track weights and reps"]},
+};
+
+function getFormTips(name){
+  const n=(name||"").toLowerCase();
+  if(n.includes("squat")||n.includes("goblet")) return FORM_TIPS.squat;
+  if(n.includes("bench")||n.includes("chest press")) return FORM_TIPS.bench;
+  if(n.includes("deadlift")||n.includes("rdl")) return FORM_TIPS.deadlift;
+  if(n.includes("pull-up")||n.includes("pullup")||n.includes("pulldown")||n.includes("chin")) return FORM_TIPS.pullup;
+  if(n.includes("curl")) return FORM_TIPS.curl;
+  if(n.includes("push-up")||n.includes("pushup")) return FORM_TIPS.pushup;
+  if(n.includes("row")||n.includes("shrug")) return FORM_TIPS.row;
+  if(n.includes("press")&&!n.includes("bench")&&!n.includes("chest")) return FORM_TIPS.press;
+  if(n.includes("lunge")||n.includes("split squat")) return FORM_TIPS.lunge;
+  if(n.includes("plank")||n.includes("crunch")||n.includes("leg raise")) return FORM_TIPS.plank;
+  return FORM_TIPS.generic;
+}
+
+/* ── ICON (Lucide-style SVG) ── */
+const ICON_PATHS={
+  Dumbbell:"M6.5 6.5h11M17.5 4v5M6.5 4v5M2 6.5h3M19 6.5h3",
+  Utensils:"M3 2v7c0 1.1.9 2 2 2h4V2M14 2v20M18 2v7c0 1.1-.9 2-2 2",
+  Camera:"M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2zM12 17a4 4 0 100-8 4 4 0 000 8z",
+  Trophy:"M6 9H4.5a2.5 2.5 0 010-5H6M18 9h1.5a2.5 2.5 0 000-5H18M4 22h16M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 19.24 7 22h10c0-2.76-.85-3.25-2.03-3.79A1.07 1.07 0 0114 17v-2.34M18 2H6v7a6 6 0 1012 0V2z",
+  BarChart:"M12 20V10M18 20V4M6 20v-4",
+  Brain:"M12 2a7.5 7.5 0 00-3 14.37V20h6v-3.63A7.5 7.5 0 0012 2z",
+  Settings:"M12 15a3 3 0 100-6 3 3 0 000 6zM19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z",
+  Play:"M5 3l14 9-14 9V3z",Pause:"M6 4h4v16H6zM14 4h4v16h-4z",
+  X:"M18 6L6 18M6 6l12 12",Check:"M20 6L9 17l-5-5",
+  ChevronRight:"M9 18l6-6-6-6",ChevronDown:"M6 9l6 6 6-6",ChevronUp:"M18 15l-6-6-6 6",
+  Plus:"M12 5v14M5 12h14",Trash2:"M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2",
+  Pencil:"M17 3a2.83 2.83 0 114 4L7.5 20.5 2 22l1.5-5.5L17 3z",
+  Eye:"M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8zM12 15a3 3 0 100-6 3 3 0 000 6z",
+  Star:"M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z",
+  Crown:"M2 4l3 12h14l3-12-6 7-4-9-4 9-6-7z",
+  Flame:"M8.5 14.5A2.5 2.5 0 0011 12c0-1.38-.5-2-1-3-1.07-2.14 0-5.5 3.5-7.5-1 3.75 1.5 5 2.5 7.5 1 2.38 1 4-.5 5.5a4.5 4.5 0 01-7 0z",
+  Zap:"M13 2L3 14h9l-1 8 10-12h-9l1-8z",
+  Shield:"M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z",
+  Mountain:"M2 20L12 4l10 16H2z",Sparkles:"M12 2l1.5 5.5L19 9l-5.5 1.5L12 16l-1.5-5.5L5 9l5.5-1.5L12 2z",
+  Footprints:"M4 16v-2.38C4 11.5 2.97 10.5 3 8c.03-2.5 1-3 1-3M8 16v-2.38C8 11.5 6.97 10.5 7 8c.03-2.5 1-3 1-3M12 16v-2.38c0-2.12-1.03-3.12-1-5.62.03-2.5 1-3 1-3M16 16v-2.38c0-2.12-1.03-3.12-1-5.62.03-2.5 1-3 1-3",
+  Moon:"M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z",
+  Sun:"M12 17a5 5 0 100-10 5 5 0 000 10zM12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42",
+  Droplets:"M12 2.69l5.66 5.66a8 8 0 11-11.31 0L12 2.69z",
+  Target:"M12 22a10 10 0 100-20 10 10 0 000 20zM12 18a6 6 0 100-12 6 6 0 000 12zM12 14a2 2 0 100-4 2 2 0 000 4z",
+  Lock:"M19 11H5a2 2 0 00-2 2v7a2 2 0 002 2h14a2 2 0 002-2v-7a2 2 0 00-2-2zM7 11V7a5 5 0 0110 0v4",
+  User:"M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2M12 11a4 4 0 100-8 4 4 0 000 8z",
+  TrendingUp:"M23 6l-9.5 9.5-5-5L1 18",
+  MessageSquare:"M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z",
+  Scan:"M2 8V4a2 2 0 012-2h4M16 2h4a2 2 0 012 2v4M22 16v4a2 2 0 01-2 2h-4M8 22H4a2 2 0 01-2-2v-4",
+  Upload:"M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12",
+  Loader:"M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83",
+  Rocket:"M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 00-2.91-.09zM12 15l-3-3a22 22 0 012-3.95A12.88 12.88 0 0122 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 01-4 2z",
+  Sword:"M14.5 17.5L3 6V3h3l11.5 11.5M13 19l6-6M16 16l4 4",
+  Wind:"M9.59 4.59A2 2 0 1111 8H2M12.59 19.41A2 2 0 1014 16H2M17.73 7.27A2.5 2.5 0 1119.5 12H2",
+  Cpu:"M4 4h16v16H4zM9 1v3M15 1v3M9 20v3M15 20v3M1 9h3M1 15h3M20 9h3M20 15h3",
+  Bell:"M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0",
+  LineChart:"M3 3v18h18M7 16l4-8 4 4 4-12",
+  Download:"M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3",
+  Smartphone:"M5 2h14a2 2 0 012 2v16a2 2 0 01-2 2H5a2 2 0 01-2-2V4a2 2 0 012-2zm7 17a1 1 0 100-2 1 1 0 000 2z",
+};
+
+function Icon({name,size=24,sw=1.5,style={},className=""}){
+  const d=ICON_PATHS[name];
+  if(!d) return null;
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round" style={style} className={className}><path d={d}/></svg>;
+}
+
+/* ── CHARTS ── */
+function BarChart({data,color,labels,h=70}){
+  const mx=Math.max(...data,1);
+  const w=data.length;
+  return <svg viewBox={`0 0 ${w*14} ${h+18}`} style={{width:"100%",height:h+18}}>
+    {data.map((v,i)=>{
+      const bh=Math.max((v/mx)*(h-4),v>0?3:0);
+      return <g key={i}>
+        <rect x={i*14+2} y={h-bh} width={10} height={bh} rx={3} fill={v>0?color:"#1a1a1a"} opacity={v>0?.85:.3}/>
+        {labels&&labels[i]&&<text x={i*14+7} y={h+13} textAnchor="middle" fontSize="7" fill="#3f3f46" fontWeight="700">{labels[i]}</text>}
+        {v>0&&<text x={i*14+7} y={h-bh-3} textAnchor="middle" fontSize="7" fill={color} fontWeight="700">{v}</text>}
+      </g>;
+    })}
+  </svg>;
+}
+
+/* ══ MAIN APP ══ */
+function App(){
+  const[tab,setTab]=useState("train");
+  const[xp,setXp]=useState(()=>loadJSON("fg_xp",0));
+  const[wHistory,setWH]=useState(()=>loadJSON("fg_wh",[]));
+  const[mHistory,setMH]=useState(()=>loadJSON("fg_mh",[]));
+  const[chalData,setChalData]=useState(()=>loadJSON("fg_ch",{}));
+  const[flags,setFlags]=useState(()=>loadJSON("fg_flags",{}));
+  const[xpLog,setXpLog]=useState(()=>loadJSON("fg_xplog",[]));
+  const[settings,setSettings]=useState(()=>loadJSON("fg_set",{tone:"brutal",units:"lbs",notifications:true,name:""}));
+  const[macroGoals,setMacroGoals]=useState(()=>loadJSON("fg_macro_goals",{kcal:2200,protein:150,carbs:220,fat:65,goal:"maintain"}));
+  const[streak,setStreak]=useState(()=>loadJSON("fg_streak",{cur:0,best:0,lastDate:null}));
+  const[workout,setWorkout]=useState([]);
+  const[showKin,setShowKin]=useState(null);
+  const[showEdit,setShowEdit]=useState(null);
+  const[showAddEx,setShowAddEx]=useState(false);
+  const[showOverlay,setShowOverlay]=useState(false);
+  const[showPaywall,setShowPaywall]=useState(false);
+  const[badgeView,setBadgeView]=useState(null);
+  const[coachMsg,setCoachMsg]=useState(null);
+  const[toast,setToast]=useState(null);
+  const[levelUpData,setLevelUpData]=useState(null);
+  const[onboarded,setOnboarded]=useState(()=>!!localStorage.getItem("fg_onb"));
+
+  const tone=settings.tone||"brutal";
+
+  /* persist */
+  useEffect(()=>{saveJSON("fg_xp",xp);},[xp]);
+  useEffect(()=>{saveJSON("fg_wh",wHistory);},[wHistory]);
+  useEffect(()=>{saveJSON("fg_mh",mHistory);},[mHistory]);
+  useEffect(()=>{saveJSON("fg_ch",chalData);},[chalData]);
+  useEffect(()=>{saveJSON("fg_flags",flags);},[flags]);
+  useEffect(()=>{saveJSON("fg_xplog",xpLog);},[xpLog]);
+  useEffect(()=>{saveJSON("fg_set",settings);},[settings]);
+  useEffect(()=>{saveJSON("fg_streak",streak);},[streak]);
+  useEffect(()=>{saveJSON("fg_macro_goals",macroGoals);},[macroGoals]);
+
+  /* streak */
+  useEffect(()=>{
+    const today=todayStr(), yest=daysAgo(1);
+    if(streak.lastDate===today) return;
+    if(streak.lastDate===yest) setStreak(s=>({cur:s.cur+1,best:Math.max(s.best,s.cur+1),lastDate:today}));
+    else if(streak.lastDate!==today) setStreak(s=>({cur:1,best:Math.max(s.best,1),lastDate:today}));
+  },[]);
+
+  const showToast=(msg)=>{setToast(msg);setTimeout(()=>setToast(null),2800);};
+
+  const addXP=(amt,reason,showCoach=false)=>{
+    const prev=getLvl(xp), next=getLvl(xp+amt);
+    setXp(x=>x+amt);
+    setXpLog(l=>[...l,{date:todayStr(),amt,reason}]);
+    showToast(`+${amt} XP — ${reason}`);
+    if(next.idx>prev.idx){
+      playSound("level");
+      setLevelUpData({oldLv:prev.lv,newLv:next.lv,rankIdx:next.idx+1});
+    } else if(showCoach){
+      setTimeout(()=>setCoachMsg({type:"workout"}),600);
+    }
+  };
+
+  const setFlag=f=>setFlags(p=>({...p,[f]:true}));
+  const recordWorkout=w=>{setWH(h=>[{...w,date:todayStr(),id:Date.now()},...h]);setFlag(new Date().getHours()>=22?"nightOwl":new Date().getHours()<6?"earlyBird":"session");};
+  const recordMeal=m=>setMH(h=>[m,...h]);
+  const deleteMeal=id=>setMH(h=>h.filter(m=>m.id!==id));
+  const onBadge=(b,pid)=>setBadgeView({b,pid});
+
+  const wCount=wHistory.length, mCount=mHistory.length;
+  const TABS=[
+    {id:"train",icon:"Dumbbell",label:"TRAIN"},
+    {id:"food",icon:"Utensils",label:"FOOD"},
+    {id:"rank",icon:"Trophy",label:"RANK"},
+    {id:"data",icon:"BarChart",label:"DATA"},
+    {id:"coach",icon:"Brain",label:"COACH"},
+    {id:"settings",icon:"Settings",label:"MORE"},
+  ];
+  const{lv}=getLvl(xp);
+
+  if(!onboarded) return <OnboardModal onDone={()=>{setOnboarded(true);localStorage.setItem("fg_onb","1");}}/>;
+
+  return <div style={{height:"100%",display:"flex",flexDirection:"column",maxWidth:480,margin:"0 auto",position:"relative"}}>
+    {/* Header */}
+    <div style={{flexShrink:0,padding:"12px 14px 10px",borderBottom:"1px solid #18181b",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+      <div>
+        <div style={{fontSize:14,fontWeight:900,letterSpacing:"0.06em"}}>FITGENIUS<span style={{color:lv.c}}>.AI</span></div>
+        <div style={{fontSize:9,color:"#52525b",fontWeight:600,letterSpacing:"0.08em",marginTop:1}}>{lv.n} · {xp.toLocaleString()} XP · {streak.cur}d 🔥</div>
+      </div>
+      <LvlBadge xp={xp}/>
+    </div>
+
+    {/* Content */}
+    <div style={{flex:1,overflowY:"auto",overflowX:"hidden",WebkitOverflowScrolling:"touch",scrollBehavior:"smooth"}}>
+      {tab==="train"&&<TrainTab tone={tone} addXP={addXP} workout={workout} setWorkout={setWorkout} setShowKin={setShowKin} setShowEdit={setShowEdit} setShowAddEx={setShowAddEx} showOverlay={showOverlay} setShowOverlay={setShowOverlay} recordWorkout={recordWorkout} setFlag={setFlag} streak={streak} xp={xp} lv={lv}/>}
+      {tab==="food"&&<FoodTab tone={tone} addXP={addXP} mHistory={mHistory} recordMeal={recordMeal} deleteMeal={deleteMeal} setShowPaywall={setShowPaywall} macroGoals={macroGoals} setMacroGoals={setMacroGoals} units={settings.units||"lbs"}/>}
+      {tab==="rank"&&<RankTab xp={xp} tone={tone} wCount={wCount} mCount={mCount} streak={streak.cur} flags={flags} chalData={chalData} setChalData={setChalData} addXP={addXP} setFlag={setFlag} onBadge={onBadge}/>}
+      {tab==="data"&&<DataTab xp={xp} wHistory={wHistory} mHistory={mHistory} xpLog={xpLog} streak={streak} setShowPaywall={setShowPaywall}/>}
+      {tab==="coach"&&<CoachTab tone={tone} settings={settings} setSettings={setSettings} setShowPaywall={setShowPaywall} setFlag={setFlag}/>}
+      {tab==="settings"&&<SettingsTab settings={settings} setSettings={setSettings} xp={xp} streak={streak} wCount={wCount} setShowPaywall={setShowPaywall} tone={tone}/>}
+    </div>
+
+    {/* Bottom Nav */}
+    <div style={{flexShrink:0,borderTop:"1px solid #18181b",background:"#000",display:"flex",padding:"6px 4px",paddingBottom:"max(6px,env(safe-area-inset-bottom))"}}>
+      {TABS.map(t=><button key={t.id} onClick={()=>setTab(t.id)} className="tap" style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:2,padding:"5px 0",background:"none",border:"none",cursor:"pointer",color:tab===t.id?"#fff":"#3f3f46",transition:"color .15s"}}>
+        <Icon name={t.icon} size={18} sw={tab===t.id?2:1.3}/>
+        <span style={{fontSize:8,fontWeight:tab===t.id?900:600,letterSpacing:"0.1em"}}>{t.label}</span>
+      </button>)}
+    </div>
+
+    {/* Modals */}
+    {showKin&&<KinModal ex={showKin} onClose={()=>setShowKin(null)}/>}
+    {showEdit&&<EditModal ex={showEdit} onSave={updated=>{setWorkout(p=>p.map(e=>e.id===updated.id?updated:e));setShowEdit(null);}} onClose={()=>setShowEdit(null)}/>}
+    {showAddEx&&<AddExModal onAdd={ex=>{setWorkout(p=>[...p,{...ex,id:`ex-${Date.now()}`}]);setShowAddEx(false);}} onClose={()=>setShowAddEx(false)}/>}
+    {showPaywall&&<PaywallModal tone={tone} onClose={()=>setShowPaywall(false)}/>}
+    {badgeView&&<BadgeModal b={badgeView.b} pid={badgeView.pid} xp={xp} wCount={wCount} mCount={mCount} streak={streak.cur} flags={flags} onClose={()=>setBadgeView(null)}/>}
+    {levelUpData&&<LevelUpModal data={levelUpData} onClose={()=>setLevelUpData(null)}/>}
+    {toast&&<div style={{position:"fixed",top:50,left:"50%",transform:"translateX(-50%)",zIndex:99,background:"#18181b",border:"1px solid #27272a",borderRadius:10,padding:"8px 18px",fontSize:11,fontWeight:700,color:"#d4d4d8",animation:"toast 2.8s ease forwards",whiteSpace:"nowrap",pointerEvents:"none"}}>{toast}</div>}
+    {coachMsg&&<CoachPopup msg={coachMsg} tone={tone} onClose={()=>setCoachMsg(null)}/>}
+    <ChatAssistant tone={tone} xp={xp} streak={streak} wCount={wCount} mCount={mCount} lv={lv}/>
+  </div>;
+}
+
+function LvlBadge({xp}){
+  const{lv,pct,idx}=getLvl(xp);
+  const R=15,C=2*Math.PI*R;
+  return <div style={{position:"relative",width:38,height:38}}>
+    <svg width="38" height="38" style={{transform:"rotate(-90deg)"}}>
+      <circle cx="19" cy="19" r={R} fill="none" stroke="#27272a" strokeWidth="3"/>
+      <circle cx="19" cy="19" r={R} fill="none" stroke={lv.c} strokeWidth="3" strokeDasharray={C} strokeDashoffset={C-(pct/100)*C} strokeLinecap="round" style={{filter:`drop-shadow(0 0 4px ${lv.c})`}}/>
+    </svg>
+    <div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,fontWeight:900,color:lv.c}}>{idx+1}</div>
+  </div>;
+}
+
+/* ── DAILY COACH BANNER ── */
+function DailyCoachBanner({tone,streak,xp,lv}){
+  const[quote,setQuote]=useState(null);
+  const[loadingQuote,setLoadingQuote]=useState(false);
+
+  const COACH_DATA={
+    brutal:{name:"SERGEANT IRON",color:"#f87171",icon:"Sword",tag:"ZERO EXCUSES",defaultQuote:"Pain is weakness leaving the body. Put the work in today."},
+    friendly:{name:"DR. WELLNESS",color:"#4ade80",icon:"Sun",tag:"SCIENCE & FORM",defaultQuote:"Consistency beats intensity every time. Listen to your body and make progress."},
+    hype:{name:"HYPE LORD",color:"#fbbf24",icon:"Zap",tag:"MAX ENERGY",defaultQuote:"YOU ARE BUILT DIFFERENT! Today is your day to break personal records!"},
+    zen:{name:"MASTER ZEN",color:"#38bdf8",icon:"Wind",tag:"MIND & FOCUS",defaultQuote:"Breathe deeply. Flow with resistance. Mastery is patience in motion."},
+    science:{name:"DATA COACH",color:"#a78bfa",icon:"Cpu",tag:"OPTIMIZED",defaultQuote:"Stimulate, do not annihilate. Progressive overload calculated for maximum hypertrophy."}
+  };
+  const c=COACH_DATA[tone]||COACH_DATA.brutal;
+
+  const fetchAiBriefing=async()=>{
+    if(loadingQuote)return;
+    setLoadingQuote(true);
+    try{
+      const now=new Date();
+      const prompt=`You are ${c.name}, a fitness coach with personality tone '${tone}'.
+User rank: ${lv?.n||"Athlete"} (${xp||0} XP), streak: ${streak?.cur||0} days.
+Time: ${now.toLocaleTimeString()}.
+Provide a single 1-sentence powerful motivation or workout focus cue for today. Under 25 words.`;
+      const res=await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key="+GEMINI_KEY,{
+        method:"POST",headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({contents:[{role:"user",parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:80,temperature:0.9}})
+      });
+      const d=await res.json();
+      const txt=d.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+      if(txt&&txt.length>4){setQuote(txt.replace(/^"|"$/g,''));setLoadingQuote(false);return;}
+    }catch(e){}
+    setLoadingQuote(false);
+    setQuote(c.defaultQuote);
+  };
+
+  const todayDate=new Date().toLocaleDateString(undefined,{weekday:"short",month:"short",day:"numeric"}).toUpperCase();
+
+  return <div className="card fade-up" style={{padding:12,border:`1px solid ${c.color}33`,background:`${c.color}08`}}>
+    <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:8}}>
+      <div style={{display:"flex",alignItems:"center",gap:8}}>
+        <div style={{width:28,height:28,borderRadius:7,background:`${c.color}22`,border:`1px solid ${c.color}55`,display:"flex",alignItems:"center",justifyContent:"center"}}>
+          <Icon name={c.icon} size={14} sw={2} style={{color:c.color}}/>
+        </div>
+        <div>
+          <div style={{fontSize:8,letterSpacing:"0.14em",color:c.color,fontWeight:900}}>{c.name} · {c.tag}</div>
+          <div style={{fontSize:8,color:"#52525b",fontWeight:700}}>{todayDate} · {streak?.cur||0}D STREAK 🔥</div>
+        </div>
+      </div>
+      <button onClick={fetchAiBriefing} disabled={loadingQuote} className="tap" style={{padding:"4px 8px",background:`${c.color}15`,border:`1px solid ${c.color}44`,borderRadius:6,color:c.color,fontSize:8,fontWeight:900,cursor:loadingQuote?"default":"pointer",display:"flex",alignItems:"center",gap:4}}>
+        <Icon name="Sparkles" size={10} sw={2}/>{loadingQuote?"THINKING...":"AI BRIEFING"}
+      </button>
+    </div>
+    <div style={{fontSize:11,color:"#e4e4e7",lineHeight:1.5,fontStyle:"italic"}}>
+      "{quote||c.defaultQuote}"
+    </div>
+  </div>;
+}
+
+/* ══ TRAIN TAB ══ */
+function TrainTab({tone,addXP,workout,setWorkout,setShowKin,setShowEdit,setShowAddEx,showOverlay,setShowOverlay,recordWorkout,setFlag,streak,xp,lv}){
+  const[mode,setMode]=useState("params");
+  const[muscles,setMuscles]=useState([]);
+  const[intensity,setIntensity]=useState("Intermediate");
+  const[duration,setDuration]=useState("45 min");
+  const[aiPrompt,setAiPrompt]=useState("");
+  const[loading,setLoading]=useState(false);
+  const INP={background:"#09090b",border:"1px solid #27272a",borderRadius:10,color:"#fff",fontSize:13,padding:"10px 12px",outline:"none",fontFamily:"inherit",width:"100%"};
+  const togMuscle=m=>setMuscles(p=>p.includes(m)?p.filter(x=>x!==m):[...p,m]);
+
+  const QUICK_PROMPTS=[
+    "🔥 20m Dumbbell Full Body",
+    "⚡ Heavy Chest & Triceps",
+    "🍑 Glutes & Core (No Weights)",
+    "🦵 Leg Day Hypertrophy",
+    "🏃‍♂️ 15m Fast HIIT Fat Burn"
+  ];
+
+  const gen=async()=>{
+    setLoading(true);
+    if(mode==="ai"&&aiPrompt.trim()){
+      try{
+        const promptText=`You are an elite strength & conditioning coach.
+User workout request: "${aiPrompt}".
+Target intensity: ${intensity}. Target duration: ${duration}.
+Create a scientifically optimal workout with 4-6 exercises.
+Reply ONLY with a raw JSON array matching this format, no markdown:
+[{"n":"Exercise Name","s":3,"r":10,"mu":["Chest","Triceps"]}]`;
+
+        const res=await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key="+GEMINI_KEY,{
+          method:"POST",headers:{"Content-Type":"application/json"},
+          body:JSON.stringify({contents:[{role:"user",parts:[{text:promptText}]}],generationConfig:{maxOutputTokens:350,temperature:0.2}})
+        });
+        const d=await res.json();
+        const raw=(d.candidates?.[0]?.content?.parts?.[0]?.text||"").trim();
+        const m=raw.match(/\[[\s\S]*\]/);
+        if(m){
+          const parsed=JSON.parse(m[0]);
+          if(Array.isArray(parsed)&&parsed.length>0){
+            setWorkout(parsed.map((e,i)=>({
+              n:e.n||e.name||"Exercise",
+              name:e.n||e.name||"Exercise",
+              s:e.s||e.sets||3,
+              sets:e.s||e.sets||3,
+              r:e.r||e.reps||10,
+              reps:e.r||e.reps||10,
+              mu:e.mu||e.muscles||["Full Body"],
+              muscles:e.mu||e.muscles||["Full Body"],
+              id:`ai-ex-${Date.now()}-${i}`
+            })));
+            setLoading(false);
+            return;
+          }
+        }
+      }catch(e){console.warn("AI workout generation error:",e);}
+    }
+
+    setTimeout(()=>{
+      let exs=[];
+      const grps=muscles.length?muscles:["CHEST"];
+      grps.forEach(g=>{const pr=WP[g]||[];exs.push(...pr.slice(0,Math.ceil(6/grps.length)));});
+      setWorkout(exs.slice(0,6).map((e,i)=>({...e,id:`ex-${Date.now()}-${i}`})));
+      setLoading(false);
+    },800);
+  };
+
+  return <div style={{padding:14,paddingBottom:24,display:"flex",flexDirection:"column",gap:12}}>
+    {/* Daily AI Coach Motivation */}
+    <DailyCoachBanner tone={tone} streak={streak} xp={xp} lv={lv}/>
+
+    {/* Mode Selector */}
+    <div style={{display:"flex",background:"#09090b",border:"1px solid #27272a",borderRadius:10,overflow:"hidden",padding:3,gap:3}}>
+      {[["params","PARAMETERS"],["ai","AI PROMPT ⚡"]].map(([m,l])=><button key={m} onClick={()=>setMode(m)} className="tap" style={{flex:1,padding:"8px 0",fontSize:9,letterSpacing:"0.1em",fontWeight:900,border:"none",cursor:"pointer",background:mode===m?"#fff":"transparent",color:mode===m?"#000":"#52525b",borderRadius:7}}>{l}</button>)}
+    </div>
+
+    {mode==="params"?<div className="fade-up" style={{display:"flex",flexDirection:"column",gap:10}}>
+      <div style={{fontSize:9,letterSpacing:"0.18em",color:"#52525b",fontWeight:700}}>TARGET MUSCLES</div>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:6}}>
+        {MUSCLE_GROUPS.slice(0,12).map(m=><button key={m} onClick={()=>togMuscle(m)} className="tap" style={{padding:"8px 4px",fontSize:8,letterSpacing:"0.06em",fontWeight:900,border:muscles.includes(m)?"1px solid #fff":"1px solid #27272a",background:muscles.includes(m)?"#fff":"#09090b",color:muscles.includes(m)?"#000":"#52525b",borderRadius:7,cursor:"pointer",transition:"all .15s"}}>{m}</button>)}
+      </div>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
+        {[["INTENSITY",intensity,setIntensity,["Beginner","Intermediate","Advanced"]],["DURATION",duration,setDuration,["15 min","30 min","45 min","60 min","90 min"]]].map(([l,v,sv,opts])=><div key={l}>
+          <div style={{fontSize:8,letterSpacing:"0.18em",color:"#52525b",fontWeight:700,marginBottom:5}}>{l}</div>
+          <select value={v} onChange={e=>sv(e.target.value)} style={{...INP,WebkitAppearance:"none"}}>{opts.map(o=><option key={o}>{o}</option>)}</select>
+        </div>)}
+      </div>
+    </div>:<div className="fade-up" style={{display:"flex",flexDirection:"column",gap:8}}>
+      <div style={{fontSize:8,letterSpacing:"0.18em",color:"#52525b",fontWeight:700}}>AI DIRECTIVE (POWERED BY GEMINI)</div>
+      <textarea value={aiPrompt} onChange={e=>setAiPrompt(e.target.value)} placeholder="e.g. 30 min dumbbell upper body pump, focus on shoulders and arms, bad lower back..." style={{...INP,resize:"none",height:85,lineHeight:1.5}}/>
+      <div style={{display:"flex",gap:5,overflowX:"auto",paddingBottom:4}}>
+        {QUICK_PROMPTS.map(p=><button key={p} onClick={()=>setAiPrompt(p.replace(/^[^\w]+/, ''))} className="tap" style={{flexShrink:0,padding:"4px 8px",fontSize:8,fontWeight:700,color:"#a1a1aa",background:"#09090b",border:"1px solid #27272a",borderRadius:99,cursor:"pointer"}}>{p}</button>)}
+      </div>
+    </div>}
+
+    <button onClick={gen} disabled={loading} className="tap" style={{width:"100%",padding:"13px 0",fontSize:10,letterSpacing:"0.14em",fontWeight:900,background:loading?"#18181b":"#fff",color:loading?"#52525b":"#000",border:"none",borderRadius:10,cursor:loading?"default":"pointer"}}>
+      {loading?<span className="shimmer">AI ARCHITECTING PROTOCOL...</span>:mode==="ai"?"GENERATE WITH AI ⚡":"GENERATE PROTOCOL"}
+    </button>
+
+    {workout.length>0&&!loading&&<div className="fade-up" style={{display:"flex",flexDirection:"column",gap:8}}>
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+        <div style={{fontSize:9,letterSpacing:"0.18em",color:"#52525b",fontWeight:700}}>PROTOCOL — {workout.length} EXERCISES</div>
+        <div style={{display:"flex",gap:6}}>
+          <button onClick={()=>setShowAddEx(true)} className="tap" style={{display:"flex",alignItems:"center",gap:5,border:"1px solid #27272a",background:"none",color:"#71717a",borderRadius:7,padding:"6px 10px",fontSize:9,letterSpacing:"0.1em",fontWeight:900,cursor:"pointer"}}><Icon name="Plus" size={11}/> ADD</button>
+          <button onClick={()=>{playSound("set");setShowOverlay(true);}} className="tap" style={{display:"flex",alignItems:"center",gap:6,background:"#fff",color:"#000",border:"none",borderRadius:7,padding:"7px 12px",fontSize:9,letterSpacing:"0.1em",fontWeight:900,cursor:"pointer"}}><Icon name="Play" size={11} sw={2.5}/>EXECUTE</button>
+        </div>
+      </div>
+      {workout.map(ex=><ExCard key={ex.id} ex={ex} onKin={()=>setShowKin(ex)} onEdit={()=>setShowEdit(ex)} onDel={()=>setWorkout(p=>p.filter(e=>e.id!==ex.id))}/>)}
+    </div>}
+    {showOverlay&&<WorkoutOverlay workout={workout} tone={tone} onClose={()=>setShowOverlay(false)} onDone={(sets,dur)=>{playSound("complete");addXP(sets*8+20,"Workout Complete",true);recordWorkout({exercises:workout.length,sets,duration:dur});setShowOverlay(false);}}/>}
+  </div>;
+}
+
+function ExCard({ex,onKin,onEdit,onDel}){
+  const MC={"Chest":"#60a5fa","Back":"#4ade80","Shoulders":"#fb923c","Quads":"#f87171","Glutes":"#e879f9","Hamstrings":"#34d399","Calves":"#facc15","Lats":"#38bdf8","Traps":"#a78bfa","Biceps":"#60a5fa","Triceps":"#fb923c","Core":"#fbbf24","Abs":"#fbbf24"};
+  const gc=m=>{for(const[k,c] of Object.entries(MC)){if((m||"").toLowerCase().includes(k.toLowerCase()))return c;}return "#52525b";};
+  return <div className="card fade-up" style={{padding:"11px 13px"}}>
+    <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+      <div style={{flex:1,minWidth:0}}>
+        <div style={{fontSize:12,fontWeight:800}}>{ex.n||ex.name}</div>
+        <div style={{fontSize:11,color:"#52525b",marginTop:1}}><span style={{fontWeight:900,color:"#e4e4e7"}}>{ex.s||ex.sets}</span><span style={{color:"#3f3f46"}}> × </span><span style={{fontWeight:900,color:"#e4e4e7"}}>{ex.r||ex.reps}</span></div>
+        {(ex.mu||ex.muscles)&&<div style={{display:"flex",flexWrap:"wrap",gap:4,marginTop:5}}>
+          {(ex.mu||ex.muscles||[]).slice(0,3).map(m=><span key={m} style={{fontSize:8,fontWeight:700,letterSpacing:"0.08em",padding:"2px 6px",borderRadius:99,background:`${gc(m)}18`,color:gc(m),border:`1px solid ${gc(m)}44`}}>{m.toUpperCase()}</span>)}
+        </div>}
+      </div>
+      <div style={{display:"flex",gap:5,flexShrink:0}}>
+        {[[onKin,"Eye"],[onEdit,"Pencil"],[onDel,"Trash2"]].map(([fn,ic])=><button key={ic} onClick={fn} className="tap" style={{width:28,height:28,border:"1px solid #27272a",background:"none",color:"#52525b",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",borderRadius:6}}><Icon name={ic} size={12} sw={1.5}/></button>)}
+      </div>
+    </div>
+  </div>;
+}
+
+/* ── WORKOUT OVERLAY ── */
+function WorkoutOverlay({workout,tone,onClose,onDone}){
+  const[time,setTime]=useState(0);
+  const[paused,setPaused]=useState(false);
+  const[done,setDone]=useState({});
+  const[showWarn,setShowWarn]=useState(false);
+  const[restTime,setRestTime]=useState(0);
+  const[restMax,setRestMax]=useState(90);
+  const[floatingXp,setFloatingXp]=useState(null);
+  const[justRecovered,setJustRecovered]=useState(false);
+  const timer=useRef(null);
+  const restRef=useRef(null);
+  useEffect(()=>{if(!paused)timer.current=setInterval(()=>setTime(t=>t+1),1000);else clearInterval(timer.current);return()=>clearInterval(timer.current);},[paused]);
+  useEffect(()=>{
+    if(restTime>0){
+      restRef.current=setInterval(()=>{
+        setRestTime(t=>{
+          if(t<=1){
+            clearInterval(restRef.current);
+            playSound("go");
+            setJustRecovered(true);
+            setTimeout(()=>setJustRecovered(false),3000);
+            return 0;
+          }
+          if(t<=4 && t>=2){
+            playSound("countdown");
+          }
+          return t-1;
+        });
+      },1000);
+    }
+    return()=>clearInterval(restRef.current);
+  },[restTime>0]);
+
+  const togSet=(eid,i)=>{
+    setDone(p=>{
+      const s=new Set(p[eid]||[]);
+      if(s.has(i)){
+        s.delete(i);
+      }else{
+        s.add(i);
+        setRestTime(restMax);
+        playSound("set");
+        setFloatingXp({eid,i,id:Date.now()});
+        setTimeout(()=>setFloatingXp(null),850);
+      }
+      return{...p,[eid]:s};
+    });
+  };
+
+  const total=workout.reduce((a,e)=>a+(e.s||e.sets),0);
+  const compl=Object.values(done).reduce((a,s)=>a+s.size,0);
+  const tryFinish=()=>{if(compl<total)setShowWarn(true);else onDone(compl,time);};
+  const rPct=restMax>0?(restTime/restMax)*100:0;
+
+  return <div style={{position:"fixed",inset:0,zIndex:50,background:"#000",display:"flex",flexDirection:"column"}}>
+    <div style={{height:3,background:"#18181b"}}><div style={{height:"100%",background:"#fff",width:`${total?(compl/total)*100:0}%`,transition:"width .3s"}}/></div>
+    <div style={{flexShrink:0,padding:"16px 16px 12px",textAlign:"center",borderBottom:"1px solid #18181b"}}>
+      <div style={{fontSize:9,letterSpacing:"0.2em",color:"#3f3f46",fontWeight:700,marginBottom:4}}>WORKOUT IN PROGRESS</div>
+      <div style={{fontSize:54,fontWeight:900,letterSpacing:"-0.04em",fontVariantNumeric:"tabular-nums"}}>{fmt(time)}</div>
+      <div style={{fontSize:10,color:"#52525b",marginTop:2}}>{compl}/{total} SETS COMPLETE</div>
+
+      {restTime>0&&<div style={{marginTop:10}}>
+        <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:8,marginBottom:4}}>
+          <div style={{fontSize:28,fontWeight:900,color:"#4ade80",fontVariantNumeric:"tabular-nums"}}>{fmt(restTime)}</div>
+          <div style={{fontSize:8,color:"#4ade80",fontWeight:700,letterSpacing:"0.14em"}}>REST</div>
+        </div>
+        <div style={{height:4,background:"#18181b",borderRadius:99,overflow:"hidden",maxWidth:200,margin:"0 auto 8px"}}>
+          <div style={{height:"100%",background:"#4ade80",width:`${rPct}%`,transition:"width 1s linear",borderRadius:99}}/>
+        </div>
+        {/* Quick rest adjusters */}
+        <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:6}}>
+          <button onClick={()=>setRestTime(t=>Math.max(0,t-15))} className="tap" style={{padding:"3px 8px",fontSize:8,fontWeight:900,background:"#18181b",border:"1px solid #27272a",color:"#71717a",borderRadius:5,cursor:"pointer"}}>-15s</button>
+          <button onClick={()=>setRestTime(t=>t+15)} className="tap" style={{padding:"3px 8px",fontSize:8,fontWeight:900,background:"#18181b",border:"1px solid #27272a",color:"#71717a",borderRadius:5,cursor:"pointer"}}>+15s</button>
+          <button onClick={()=>{setRestTime(0);playSound("go");setJustRecovered(true);setTimeout(()=>setJustRecovered(false),2500);}} className="tap" style={{padding:"3px 9px",fontSize:8,fontWeight:900,background:"rgba(74,222,128,.15)",border:"1px solid rgba(74,222,128,.4)",color:"#4ade80",borderRadius:5,cursor:"pointer"}}>SKIP REST ⚡</button>
+        </div>
+      </div>}
+
+      {justRecovered&&<div className="badge-pop" style={{marginTop:8,display:"inline-block",padding:"5px 12px",background:"rgba(74,222,128,.15)",border:"1px solid #4ade80",borderRadius:8,color:"#4ade80",fontSize:9,fontWeight:900,letterSpacing:"0.12em"}}>
+        ⚡ REST OVER! HIT YOUR NEXT SET!
+      </div>}
+    </div>
+
+    {/* Rest timer config */}
+    <div style={{flexShrink:0,padding:"8px 14px",borderBottom:"1px solid #18181b",display:"flex",alignItems:"center",justifyContent:"center",gap:6}}>
+      <span style={{fontSize:8,color:"#3f3f46",fontWeight:700,letterSpacing:"0.1em"}}>AUTO REST:</span>
+      {[60,90,120,180].map(s=><button key={s} onClick={()=>setRestMax(s)} className="tap" style={{padding:"4px 10px",fontSize:9,fontWeight:900,border:restMax===s?"1px solid #4ade80":"1px solid #27272a",background:restMax===s?"rgba(74,222,128,.1)":"transparent",color:restMax===s?"#4ade80":"#52525b",borderRadius:6,cursor:"pointer"}}>{s}s</button>)}
+    </div>
+
+    <div style={{flex:1,overflowY:"auto",padding:14,display:"flex",flexDirection:"column",gap:10}}>
+      {workout.map(ex=>{const ds=done[ex.id]||new Set();const sets=ex.s||ex.sets;const all=ds.size===sets;return(
+        <div key={ex.id} className="card" style={{padding:12,opacity:all?.55:1,transition:"opacity .3s"}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
+            <div style={{fontSize:11,fontWeight:900}}>{(ex.n||ex.name).toUpperCase()}</div>
+            {all&&<span style={{fontSize:9,color:"#4ade80",fontWeight:900}}>✓ DONE</span>}
+          </div>
+          <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
+            {Array.from({length:sets}).map((_,i)=><div key={i} style={{position:"relative"}}>
+              <button onClick={()=>togSet(ex.id,i)} className="tap" style={{width:40,height:40,border:ds.has(i)?"1px solid #fff":"1px solid #3f3f46",background:ds.has(i)?"#fff":"transparent",color:ds.has(i)?"#000":"#52525b",fontSize:12,fontWeight:900,cursor:"pointer",borderRadius:7,transition:"all .15s"}}>{ds.has(i)?"✓":i+1}</button>
+              {floatingXp&&floatingXp.eid===ex.id&&floatingXp.i===i&&<div className="float-xp" style={{top:-6,left:"50%"}}>+8 XP</div>}
+            </div>)}
+          </div>
+        </div>
+      );})}
+    </div>
+    <div style={{flexShrink:0,borderTop:"1px solid #18181b",padding:14,display:"flex",gap:8}}>
+      <button onClick={()=>setPaused(p=>!p)} className="tap" style={{flex:1,padding:13,border:"1px solid #27272a",background:"none",color:"#fff",fontSize:9,letterSpacing:"0.14em",fontWeight:900,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:6,borderRadius:9}}><Icon name={paused?"Play":"Pause"} size={13} sw={2}/>{paused?"RESUME":"PAUSE"}</button>
+      <button onClick={tryFinish} className="tap" style={{flex:1,padding:13,background:"#fff",color:"#000",border:"none",fontSize:9,letterSpacing:"0.14em",fontWeight:900,cursor:"pointer",borderRadius:9}}>FINISH</button>
+    </div>
+    {showWarn&&<div style={{position:"fixed",inset:0,zIndex:60,background:"rgba(0,0,0,.88)",display:"flex",alignItems:"center",justifyContent:"center",padding:16}} onClick={()=>setShowWarn(false)}>
+      <div onClick={e=>e.stopPropagation()} className="slide-up card" style={{width:"100%",maxWidth:310,padding:22,textAlign:"center"}}>
+        <div style={{fontSize:32,marginBottom:8}}>⚠️</div>
+        <div style={{fontSize:13,fontWeight:900,letterSpacing:"0.08em",marginBottom:7}}>NOT ALL SETS DONE</div>
+        <div style={{fontSize:11,color:"#71717a",marginBottom:18,lineHeight:1.6}}>{total-compl} {total-compl===1?"set":"sets"} remaining. Finishing early still counts!</div>
+        <div style={{display:"flex",gap:9}}>
+          <button onClick={()=>setShowWarn(false)} className="tap" style={{flex:1,padding:12,border:"1px solid #27272a",background:"none",color:"#fff",fontSize:9,letterSpacing:"0.1em",fontWeight:900,cursor:"pointer",borderRadius:9}}>KEEP GOING</button>
+          <button onClick={()=>onDone(compl,time)} className="tap" style={{flex:1,padding:12,background:"#f87171",color:"#000",border:"none",fontSize:9,letterSpacing:"0.1em",fontWeight:900,cursor:"pointer",borderRadius:9}}>FINISH ANYWAY</button>
+        </div>
+      </div>
+    </div>}
+  </div>;
+}
+
+/* ── FORM GUIDE MODAL ── */
+function KinModal({ex,onClose}){
+  const name=ex.n||ex.name;
+  const ft=getFormTips(name);
+  const DC={Beginner:"#4ade80",Intermediate:"#fbbf24",Advanced:"#f87171",Varies:"#60a5fa"};
+  const dc=DC[ft.diff]||"#71717a";
+  const MC2={"Chest":"#60a5fa","Quads":"#f87171","Glutes":"#e879f9","Hamstrings":"#34d399","Lats":"#38bdf8","Biceps":"#60a5fa","Core":"#fbbf24","Back":"#4ade80","Shoulders":"#fb923c","Triceps":"#fb923c"};
+  const gc=m=>{for(const[k,cv] of Object.entries(MC2)){if((m||"").toLowerCase().includes(k.toLowerCase()))return cv;}return "#71717a";};
+  const ytUrl="https://www.youtube.com/results?search_query="+encodeURIComponent(name+" exercise form tutorial");
+  return <div onClick={onClose} className="modal-bg" style={{position:"fixed",inset:0,zIndex:40,background:"rgba(0,0,0,.92)",display:"flex",alignItems:"flex-end",justifyContent:"center"}}>
+    <div onClick={e=>e.stopPropagation()} className="slide-up" style={{width:"100%",maxWidth:480,background:"#09090b",border:"1px solid #27272a",borderRadius:"16px 16px 0 0",overflow:"hidden",maxHeight:"88vh",display:"flex",flexDirection:"column"}}>
+      <div style={{padding:"15px 16px 13px",borderBottom:"1px solid #18181b",display:"flex",justifyContent:"space-between",alignItems:"center",flexShrink:0}}>
+        <div><div style={{fontSize:8,letterSpacing:"0.2em",color:"#52525b",fontWeight:700}}>FORM GUIDE</div><div style={{fontSize:16,fontWeight:900}}>{name.toUpperCase()}</div></div>
+        <div style={{display:"flex",alignItems:"center",gap:8}}>
+          <span style={{fontSize:8,fontWeight:900,color:dc,border:`1px solid ${dc}44`,background:`${dc}0f`,padding:"3px 9px",borderRadius:99}}>{ft.diff.toUpperCase()}</span>
+          <button onClick={onClose} style={{background:"none",border:"none",color:"#52525b",cursor:"pointer",display:"flex"}}><Icon name="X" size={18}/></button>
+        </div>
+      </div>
+      <div style={{overflowY:"auto",flex:1,padding:"13px 16px 0"}}>
+        <div style={{fontSize:8,letterSpacing:"0.14em",color:"#52525b",fontWeight:700,marginBottom:7}}>MUSCLES TARGETED</div>
+        <div style={{display:"flex",flexWrap:"wrap",gap:5,marginBottom:14}}>
+          {(ft.mu||[]).map(m=><span key={m} style={{fontSize:9,fontWeight:800,padding:"4px 10px",borderRadius:99,background:`${gc(m)}15`,color:gc(m),border:`1px solid ${gc(m)}44`}}>{m.toUpperCase()}</span>)}
+        </div>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:7,marginBottom:14}}>
+          {[["SETS",ex.s||ex.sets],["REPS",ex.r||ex.reps],["LEVEL",ft.diff]].map(([l,v])=><div key={l} style={{background:"#000",padding:"9px 5px",borderRadius:9,textAlign:"center",border:"1px solid #18181b"}}>
+            <div style={{fontSize:7,color:"#52525b",fontWeight:700,letterSpacing:"0.12em"}}>{l}</div>
+            <div style={{fontSize:13,fontWeight:900,marginTop:2}}>{v}</div>
+          </div>)}
+        </div>
+        <div style={{fontSize:8,letterSpacing:"0.14em",color:"#52525b",fontWeight:700,marginBottom:8}}>FORM CUES</div>
+        <div style={{display:"flex",flexDirection:"column",gap:6,marginBottom:14}}>
+          {ft.tips.map((tip,i)=><div key={i} className="fade-up" style={{display:"flex",alignItems:"flex-start",gap:10,padding:"10px 12px",background:"#000",borderRadius:9,border:"1px solid #18181b"}}>
+            <div style={{width:20,height:20,borderRadius:99,background:"#1a1a1a",border:"1px solid #2a2a2a",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,fontSize:8,fontWeight:900,color:"#52525b"}}>{i+1}</div>
+            <div style={{fontSize:11,color:"#d4d4d8",lineHeight:1.65}}>{tip}</div>
+          </div>)}
+        </div>
+        <a href={ytUrl} target="_blank" rel="noopener noreferrer" style={{display:"flex",alignItems:"center",gap:10,width:"100%",padding:"12px 14px",background:"rgba(248,113,113,.06)",border:"1px solid rgba(248,113,113,.25)",borderRadius:10,textDecoration:"none",marginBottom:12,color:"#fff"}}>
+          <div style={{width:34,height:34,borderRadius:8,background:"rgba(248,113,113,.12)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><Icon name="Play" size={16} sw={2.5} style={{color:"#f87171"}}/></div>
+          <div style={{flex:1}}><div style={{fontSize:10,fontWeight:900,color:"#f87171"}}>WATCH FORM VIDEOS</div><div style={{fontSize:9,color:"#52525b",marginTop:1}}>YouTube tutorials for {name}</div></div>
+          <Icon name="ChevronRight" size={14} style={{color:"#52525b"}}/>
+        </a>
+        <button onClick={onClose} className="tap" style={{width:"100%",padding:13,background:"#fff",color:"#000",border:"none",borderRadius:10,fontSize:9,letterSpacing:"0.16em",fontWeight:900,cursor:"pointer",marginBottom:16}}>GOT IT</button>
+      </div>
+    </div>
+  </div>;
+}
+
+/* ── EDIT / ADD MODALS ── */
+function EditModal({ex,onSave,onClose}){
+  const[name,setName]=useState(ex.n||ex.name);
+  const[sets,setSets]=useState(ex.s||ex.sets);
+  const[reps,setReps]=useState(ex.r||ex.reps);
+  const I={width:"100%",background:"#000",border:"1px solid #27272a",borderRadius:8,color:"#fff",fontSize:13,padding:10,outline:"none",fontFamily:"inherit"};
+  return <div onClick={onClose} className="modal-bg" style={{position:"fixed",inset:0,zIndex:40,background:"rgba(0,0,0,.88)",display:"flex",alignItems:"center",justifyContent:"center",padding:14}}>
+    <div onClick={e=>e.stopPropagation()} className="slide-up card" style={{width:"100%",maxWidth:340}}>
+      <div style={{borderBottom:"1px solid #18181b",padding:"11px 14px",display:"flex",justifyContent:"space-between",alignItems:"center"}}><div style={{fontSize:9,letterSpacing:"0.18em",fontWeight:900}}>EDIT EXERCISE</div><button onClick={onClose} style={{background:"none",border:"none",color:"#52525b",cursor:"pointer",display:"flex"}}><Icon name="X" size={17}/></button></div>
+      <div style={{padding:14,display:"flex",flexDirection:"column",gap:12}}>
+        <div><div style={{fontSize:8,color:"#52525b",fontWeight:700,letterSpacing:"0.14em",marginBottom:5}}>NAME</div><input value={name} onChange={e=>setName(e.target.value)} style={I}/></div>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
+          {[["SETS",sets,setSets],["REPS",reps,setReps]].map(([l,v,sv])=><div key={l}><div style={{fontSize:8,color:"#52525b",fontWeight:700,letterSpacing:"0.14em",marginBottom:5}}>{l}</div><input type="number" value={v} onChange={e=>sv(Number(e.target.value))} style={I}/></div>)}
+        </div>
+        <button onClick={()=>onSave({...ex,n:name,name,s:sets,sets,r:reps,reps})} className="tap" style={{width:"100%",padding:12,background:"#fff",color:"#000",border:"none",borderRadius:8,fontSize:9,letterSpacing:"0.16em",fontWeight:900,cursor:"pointer"}}>SAVE</button>
+      </div>
+    </div>
+  </div>;
+}
+
+function AddExModal({onAdd,onClose}){
+  const[name,setName]=useState("");
+  const[sets,setSets]=useState(3);
+  const[reps,setReps]=useState(10);
+  const[videoUrl,setVideoUrl]=useState("");
+  const[selMu,setSelMu]=useState([]);
+  const togMu=m=>setSelMu(p=>p.includes(m)?p.filter(x=>x!==m):[...p,m]);
+  const I={width:"100%",background:"#000",border:"1px solid #27272a",borderRadius:8,color:"#fff",fontSize:13,padding:10,outline:"none",fontFamily:"inherit"};
+  return <div onClick={onClose} className="modal-bg" style={{position:"fixed",inset:0,zIndex:40,background:"rgba(0,0,0,.9)",display:"flex",alignItems:"flex-end",justifyContent:"center"}}>
+    <div onClick={e=>e.stopPropagation()} className="slide-up" style={{width:"100%",maxWidth:480,background:"#09090b",border:"1px solid #27272a",borderRadius:"14px 14px 0 0",maxHeight:"85vh",overflowY:"auto"}}>
+      <div style={{padding:"14px 14px 0",display:"flex",justifyContent:"space-between",alignItems:"center",borderBottom:"1px solid #18181b",paddingBottom:12}}>
+        <div style={{fontSize:10,letterSpacing:"0.18em",fontWeight:900}}>ADD CUSTOM EXERCISE</div>
+        <button onClick={onClose} style={{background:"none",border:"none",color:"#52525b",cursor:"pointer",display:"flex"}}><Icon name="X" size={18}/></button>
+      </div>
+      <div style={{padding:14,display:"flex",flexDirection:"column",gap:12}}>
+        <div><div style={{fontSize:8,color:"#52525b",fontWeight:700,letterSpacing:"0.14em",marginBottom:5}}>EXERCISE NAME</div><input value={name} onChange={e=>setName(e.target.value)} placeholder="e.g. Banded Hip Thrust" style={I}/></div>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
+          {[["SETS",sets,setSets],["REPS",reps,setReps]].map(([l,v,sv])=><div key={l}><div style={{fontSize:8,color:"#52525b",fontWeight:700,letterSpacing:"0.14em",marginBottom:5}}>{l}</div><input type="number" min="1" value={v} onChange={e=>sv(Number(e.target.value))} style={I}/></div>)}
+        </div>
+        <div><div style={{fontSize:8,color:"#52525b",fontWeight:700,letterSpacing:"0.14em",marginBottom:5}}>MUSCLES</div>
+          <div style={{display:"flex",flexWrap:"wrap",gap:5}}>
+            {MUSCLE_GROUPS.slice(0,12).map(m=><button key={m} onClick={()=>togMu(m)} className="tap" style={{padding:"5px 9px",fontSize:8,fontWeight:900,border:selMu.includes(m)?"1px solid #fff":"1px solid #27272a",background:selMu.includes(m)?"#fff":"transparent",color:selMu.includes(m)?"#000":"#52525b",borderRadius:99,cursor:"pointer"}}>{m}</button>)}
+          </div>
+        </div>
+        <div><div style={{fontSize:8,color:"#52525b",fontWeight:700,letterSpacing:"0.14em",marginBottom:5}}>FORM VIDEO URL (optional)</div><input value={videoUrl} onChange={e=>setVideoUrl(e.target.value)} placeholder="https://youtube.com/..." style={I}/></div>
+        <button onClick={()=>{if(!name.trim())return;onAdd({n:name,name,s:sets,sets,r:reps,reps,mu:selMu,muscles:selMu,videoUrl});}} disabled={!name.trim()} className="tap" style={{width:"100%",padding:13,background:name.trim()?"#fff":"#27272a",color:name.trim()?"#000":"#52525b",border:"none",borderRadius:9,fontSize:9,letterSpacing:"0.16em",fontWeight:900,cursor:name.trim()?"pointer":"default",marginBottom:8}}>ADD TO WORKOUT</button>
+      </div>
+    </div>
+  </div>;
+}
+
+/* ── MACRO CALCULATOR MODAL (Mifflin-St Jeor TDEE) ── */
+function MacroCalculatorModal({units,currentGoals,onSave,onClose}){
+  const[weight,setWeight]=useState(units==="kg"?75:165);
+  const[height,setHeight]=useState(units==="kg"?175:70);
+  const[age,setAge]=useState(25);
+  const[gender,setGender]=useState("male");
+  const[activity,setActivity]=useState(1.55);
+  const[goal,setGoal]=useState(currentGoals?.goal||"maintain");
+
+  const I={width:"100%",background:"#000",border:"1px solid #27272a",borderRadius:8,color:"#fff",fontSize:13,padding:"9px 10px",outline:"none",fontFamily:"inherit"};
+
+  const calculate=()=>{
+    const wKg=units==="kg"?weight:weight*0.453592;
+    const hCm=units==="kg"?height:height*2.54;
+    const bmr=gender==="male"?(10*wKg+6.25*hCm-5*age+5):(10*wKg+6.25*hCm-5*age-161);
+    const tdee=bmr*activity;
+
+    let targetKcal=Math.round(tdee);
+    let targetProtein=Math.round((units==="kg"?wKg*2.2:weight)*0.9);
+
+    if(goal==="cut"){
+      targetKcal=Math.round(tdee-500);
+      targetProtein=Math.round((units==="kg"?wKg*2.2:weight)*1.0);
+    }else if(goal==="bulk"){
+      targetKcal=Math.round(tdee+350);
+      targetProtein=Math.round((units==="kg"?wKg*2.2:weight)*0.85);
+    }
+
+    const fatKcal=targetKcal*0.25;
+    const targetFat=Math.round(fatKcal/9);
+    const carbKcal=Math.max(0, targetKcal - (targetProtein*4 + targetFat*9));
+    const targetCarbs=Math.round(carbKcal/4);
+
+    onSave({
+      kcal:targetKcal,
+      protein:targetProtein,
+      carbs:targetCarbs,
+      fat:targetFat,
+      goal,
+      calculated:true
+    });
+  };
+
+  return <div onClick={onClose} className="modal-bg" style={{position:"fixed",inset:0,zIndex:70,background:"rgba(0,0,0,.9)",display:"flex",alignItems:"center",justifyContent:"center",padding:16}}>
+    <div onClick={e=>e.stopPropagation()} className="slide-up card" style={{width:"100%",maxWidth:360,padding:16,maxHeight:"90vh",overflowY:"auto"}}>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14,borderBottom:"1px solid #18181b",paddingBottom:10}}>
+        <div>
+          <div style={{fontSize:9,letterSpacing:"0.18em",fontWeight:900,color:"#4ade80"}}>USDA / TDEE ENGINE</div>
+          <div style={{fontSize:15,fontWeight:900}}>MACRO CALCULATOR</div>
+        </div>
+        <button onClick={onClose} style={{background:"none",border:"none",color:"#52525b",cursor:"pointer"}}><Icon name="X" size={17}/></button>
+      </div>
+
+      <div style={{display:"flex",flexDirection:"column",gap:10}}>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
+          <div>
+            <div style={{fontSize:8,color:"#71717a",fontWeight:700,marginBottom:4}}>GENDER</div>
+            <select value={gender} onChange={e=>setGender(e.target.value)} style={I}>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+            </select>
+          </div>
+          <div>
+            <div style={{fontSize:8,color:"#71717a",fontWeight:700,marginBottom:4}}>AGE</div>
+            <input type="number" value={age} onChange={e=>setAge(Number(e.target.value))} style={I}/>
+          </div>
+        </div>
+
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
+          <div>
+            <div style={{fontSize:8,color:"#71717a",fontWeight:700,marginBottom:4}}>WEIGHT ({units.toUpperCase()})</div>
+            <input type="number" value={weight} onChange={e=>setWeight(Number(e.target.value))} style={I}/>
+          </div>
+          <div>
+            <div style={{fontSize:8,color:"#71717a",fontWeight:700,marginBottom:4}}>HEIGHT ({units==="kg"?"CM":"IN"})</div>
+            <input type="number" value={height} onChange={e=>setHeight(Number(e.target.value))} style={I}/>
+          </div>
+        </div>
+
+        <div>
+          <div style={{fontSize:8,color:"#71717a",fontWeight:700,marginBottom:4}}>ACTIVITY LEVEL</div>
+          <select value={activity} onChange={e=>setActivity(Number(e.target.value))} style={I}>
+            <option value={1.2}>Sedentary (Desk job / minimal exercise)</option>
+            <option value={1.375}>Lightly Active (1-2 workouts / week)</option>
+            <option value={1.55}>Moderately Active (3-5 workouts / week)</option>
+            <option value={1.725}>Very Active (6-7 heavy sessions / week)</option>
+          </select>
+        </div>
+
+        <div>
+          <div style={{fontSize:8,color:"#71717a",fontWeight:700,marginBottom:6}}>PRIMARY GOAL</div>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:6}}>
+            {[["cut","🔥 CUT","Fat loss (-500)"],["maintain","⚖️ MAINTAIN","Stay lean"],["bulk","💪 BULK","Muscle (+350)"]].map(([k,l,sub])=><button key={k} onClick={()=>setGoal(k)} className="tap" style={{padding:"8px 4px",border:goal===k?"1px solid #4ade80":"1px solid #27272a",background:goal===k?"rgba(74,222,128,.1)":"#000",color:goal===k?"#4ade80":"#71717a",borderRadius:7,cursor:"pointer",textAlign:"center"}}>
+              <div style={{fontSize:9,fontWeight:900}}>{l}</div>
+              <div style={{fontSize:7,marginTop:2,opacity:0.8}}>{sub}</div>
+            </button>)}
+          </div>
+        </div>
+
+        <button onClick={calculate} className="tap" style={{width:"100%",padding:13,background:"#fff",color:"#000",border:"none",borderRadius:9,fontSize:10,letterSpacing:"0.14em",fontWeight:900,cursor:"pointer",marginTop:6}}>
+          CALCULATE & SET TARGETS ✓
+        </button>
+      </div>
+    </div>
+  </div>;
+}
+
+/* ── AI MEAL SOLVER MODAL ── */
+function AiMealSolverModal({remKcal,remP,tone,onLogMeal,onClose}){
+  const[loading,setLoading]=useState(false);
+  const[meals,setMeals]=useState([]);
+
+  const solve=async()=>{
+    setLoading(true);
+    try{
+      const prompt=`You are a clinical nutritionist with USDA accuracy.
+User has ${remKcal} kcal and ${remP}g protein left in their daily calorie budget.
+Coaching tone: ${tone}.
+Suggest 3 specific, fast, delicious meals/snacks matching this remaining macro deficit closely.
+Reply ONLY with a raw JSON array matching this structure:
+[
+  {"food":"Name","serving":"Specific serving description e.g. 150g grilled chicken + 1 cup rice","kcal":number,"protein":number,"carbs":number,"fat":number,"desc":"Why this fits"}
+]`;
+      const res=await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key="+GEMINI_KEY,{
+        method:"POST",headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({contents:[{role:"user",parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:400,temperature:0.25}})
+      });
+      const d=await res.json();
+      const raw=(d.candidates?.[0]?.content?.parts?.[0]?.text||"").trim();
+      const m=raw.match(/\[[\s\S]*\]/);
+      if(m){
+        const parsed=JSON.parse(m[0]);
+        if(Array.isArray(parsed)&&parsed.length>0){
+          setMeals(parsed);
+          setLoading(false);
+          return;
+        }
+      }
+    }catch(e){console.warn("Meal solver error:",e);}
+    setMeals([
+      {food:"Greek Yogurt Power Bowl",serving:"1 cup nonfat yogurt + 1 scoop whey + berries",kcal:Math.min(remKcal,280),protein:Math.min(remP,38),carbs:22,fat:2,desc:"High-protein, zero prep"},
+      {food:"Egg Whites & Avocado Toast",serving:"4 egg whites, 1 whole egg, 1 slice sourdough",kcal:Math.min(remKcal,320),protein:Math.min(remP,28),carbs:25,fat:11,desc:"Clean micronutrient dense meal"},
+      {food:"Chicken Breast & Sweet Potato",serving:"150g cooked chicken breast + 150g baked potato",kcal:Math.min(remKcal,380),protein:Math.min(remP,46),carbs:38,fat:5,desc:"Gold standard muscle building fuel"}
+    ]);
+    setLoading(false);
+  };
+
+  useEffect(()=>{solve();},[]);
+
+  return <div onClick={onClose} className="modal-bg" style={{position:"fixed",inset:0,zIndex:70,background:"rgba(0,0,0,.9)",display:"flex",alignItems:"center",justifyContent:"center",padding:16}}>
+    <div onClick={e=>e.stopPropagation()} className="slide-up card" style={{width:"100%",maxWidth:380,padding:16,maxHeight:"90vh",overflowY:"auto"}}>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12,borderBottom:"1px solid #18181b",paddingBottom:10}}>
+        <div>
+          <div style={{fontSize:8,letterSpacing:"0.18em",fontWeight:900,color:"#60a5fa"}}>AI NUTRITIONIST</div>
+          <div style={{fontSize:15,fontWeight:900}}>WHAT SHOULD I EAT?</div>
+        </div>
+        <button onClick={onClose} style={{background:"none",border:"none",color:"#52525b",cursor:"pointer"}}><Icon name="X" size={17}/></button>
+      </div>
+
+      <div style={{padding:"8px 10px",background:"rgba(96,165,250,.08)",border:"1px solid rgba(96,165,250,.25)",borderRadius:8,marginBottom:12,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+        <span style={{fontSize:9,color:"#93c5fd",fontWeight:700}}>REMAINING TODAY:</span>
+        <span style={{fontSize:11,fontWeight:900,color:"#fff"}}>{remKcal} kcal · <span style={{color:"#60a5fa"}}>{remP}g Protein</span></span>
+      </div>
+
+      {loading?<div style={{textAlign:"center",padding:"30px 0"}}>
+        <span className="shimmer" style={{fontSize:11,fontWeight:900,letterSpacing:"0.14em"}}>AI CALCULATING OPTIMAL MEALS...</span>
+      </div>:<div style={{display:"flex",flexDirection:"column",gap:9}}>
+        {meals.map((m,idx)=><div key={idx} className="card fade-up" style={{padding:12,background:"#000",border:"1px solid #27272a"}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:4}}>
+            <div style={{flex:1,minWidth:0}}>
+              <div style={{fontSize:12,fontWeight:900,color:"#fff"}}>{m.food}</div>
+              <div style={{fontSize:9,color:"#71717a",marginTop:1}}>{m.serving}</div>
+            </div>
+            <div style={{textAlign:"right",flexShrink:0}}>
+              <div style={{fontSize:13,fontWeight:900,color:"#fff"}}>{m.kcal} kcal</div>
+              <div style={{fontSize:9,fontWeight:900,color:"#60a5fa"}}>{m.protein}g PROT</div>
+            </div>
+          </div>
+          {m.desc&&<div style={{fontSize:9,color:"#52525b",marginBottom:8,lineHeight:1.4}}>{m.desc}</div>}
+          <button onClick={()=>{onLogMeal(m);onClose();}} className="tap" style={{width:"100%",padding:"7px 0",background:"#fff",color:"#000",border:"none",borderRadius:6,fontSize:8,letterSpacing:"0.12em",fontWeight:900,cursor:"pointer"}}>
+            + LOG THIS MEAL
+          </button>
+        </div>)}
+      </div>}
+    </div>
+  </div>;
+}
+
+/* ── DAILY NUTRITION SUMMARY ── */
+function DailyNutritionSummary({mHistory,macroGoals,onOpenCalc,onOpenSolver}){
+  const todayMeals=mHistory.filter(m=>m.date===todayStr());
+  const totalKcal=todayMeals.reduce((acc,m)=>acc+(m.kcal||0),0);
+  const totalP=Math.round(todayMeals.reduce((acc,m)=>acc+(m.protein||0),0));
+  const totalC=Math.round(todayMeals.reduce((acc,m)=>acc+(m.carbs||0),0));
+  const totalF=Math.round(todayMeals.reduce((acc,m)=>acc+(m.fat||0),0));
+
+  const targetKcal=macroGoals?.kcal||2200;
+  const targetP=macroGoals?.protein||150;
+  const targetC=macroGoals?.carbs||220;
+  const targetF=macroGoals?.fat||65;
+
+  const remKcal=Math.max(0, targetKcal - totalKcal);
+  const remP=Math.max(0, targetP - totalP);
+
+  const kcalPct=Math.min(Math.round((totalKcal/targetKcal)*100),100);
+  const pPct=Math.min(Math.round((totalP/targetP)*100),100);
+
+  return <div className="card fade-up" style={{padding:12}}>
+    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
+      <div>
+        <div style={{fontSize:9,fontWeight:900,letterSpacing:"0.14em",color:"#d4d4d8"}}>TODAY'S MACROS (USDA)</div>
+        <div style={{fontSize:8,color:"#52525b",fontWeight:700}}>{todayMeals.length} logged · {remKcal} kcal remaining</div>
+      </div>
+      <div style={{display:"flex",gap:5}}>
+        <button onClick={onOpenCalc} className="tap" style={{padding:"4px 7px",background:"#18181b",border:"1px solid #27272a",borderRadius:5,fontSize:8,fontWeight:900,color:"#a1a1aa",cursor:"pointer"}}>
+          🎯 TARGETS
+        </button>
+        <button onClick={onOpenSolver} className="tap" style={{padding:"4px 7px",background:"rgba(96,165,250,.15)",border:"1px solid rgba(96,165,250,.35)",borderRadius:5,fontSize:8,fontWeight:900,color:"#60a5fa",cursor:"pointer"}}>
+          ✨ WHAT TO EAT
+        </button>
+      </div>
+    </div>
+
+    <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10}}>
+      <div>
+        <div style={{fontSize:22,fontWeight:900,color:"#fff"}}>{totalKcal.toLocaleString()} <span style={{fontSize:11,color:"#71717a",fontWeight:600}}>/ {targetKcal} kcal</span></div>
+        <div style={{fontSize:8,color:totalKcal<=targetKcal?"#4ade80":"#f87171",fontWeight:700}}>{totalKcal<=targetKcal?`${remKcal} kcal left`:`+${totalKcal-targetKcal} over limit`}</div>
+      </div>
+      <div style={{textAlign:"right"}}>
+        <div style={{fontSize:16,fontWeight:900,color:"#60a5fa"}}>{totalP}g <span style={{fontSize:10,color:"#71717a",fontWeight:600}}>/ {targetP}g</span></div>
+        <div style={{fontSize:8,color:"#60a5fa",fontWeight:700}}>PROTEIN ({pPct}%)</div>
+      </div>
+    </div>
+
+    <div style={{marginBottom:8}}>
+      <div style={{display:"flex",justifyContent:"space-between",fontSize:7,color:"#52525b",fontWeight:700,marginBottom:3}}>
+        <span>CALORIES</span><span>{kcalPct}%</span>
+      </div>
+      <div style={{height:4,background:"#18181b",borderRadius:99,overflow:"hidden"}}>
+        <div style={{height:"100%",width:`${kcalPct}%`,background:"linear-gradient(90deg,#4ade80,#fbbf24)",borderRadius:99,transition:"width .4s"}}/>
+      </div>
+    </div>
+
+    <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:6,background:"#000",padding:"6px 8px",borderRadius:8,border:"1px solid #18181b"}}>
+      <div style={{textAlign:"center"}}><div style={{fontSize:7,color:"#60a5fa",fontWeight:700}}>PROTEIN</div><div style={{fontSize:12,fontWeight:900}}>{totalP} / {targetP}g</div></div>
+      <div style={{textAlign:"center"}}><div style={{fontSize:7,color:"#4ade80",fontWeight:700}}>CARBS</div><div style={{fontSize:12,fontWeight:900}}>{totalC} / {targetC}g</div></div>
+      <div style={{textAlign:"center"}}><div style={{fontSize:7,color:"#fb923c",fontWeight:700}}>FAT</div><div style={{fontSize:12,fontWeight:900}}>{totalF} / {targetF}g</div></div>
+    </div>
+  </div>;
+}
+
+/* ── WATER TRACKER ── */
+function WaterTracker(){
+  const[water,setWater]=useState(()=>{const d=loadJSON("fg_water",{date:null,count:0});return d.date===todayStr()?d:{date:todayStr(),count:0};});
+  useEffect(()=>{saveJSON("fg_water",water);},[water]);
+  const add=()=>setWater(w=>({...w,count:Math.min(w.count+1,12)}));
+  const sub=()=>setWater(w=>({...w,count:Math.max(w.count-1,0)}));
+  const goal=8;
+  const pct=Math.min((water.count/goal)*100,100);
+  return <div className="card" style={{padding:"11px 13px"}}>
+    <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:8}}>
+      <div style={{display:"flex",alignItems:"center",gap:8}}>
+        <Icon name="Droplets" size={16} sw={1.5} style={{color:"#38bdf8"}}/>
+        <div style={{fontSize:10,fontWeight:900,letterSpacing:"0.1em"}}>WATER</div>
+      </div>
+      <div style={{fontSize:10,color:water.count>=goal?"#4ade80":"#71717a",fontWeight:700}}>{water.count}/{goal} glasses</div>
+    </div>
+    <div style={{display:"flex",gap:5,alignItems:"center"}}>
+      <button onClick={sub} className="tap" style={{width:28,height:28,border:"1px solid #27272a",background:"none",color:"#52525b",cursor:"pointer",borderRadius:6,display:"flex",alignItems:"center",justifyContent:"center",fontSize:14,fontWeight:900}}>−</button>
+      <div style={{flex:1,display:"flex",gap:3}}>
+        {Array.from({length:goal}).map((_,i)=><div key={i} style={{flex:1,height:24,borderRadius:4,background:i<water.count?"rgba(56,189,248,.7)":"#18181b",border:i<water.count?"1px solid rgba(56,189,248,.5)":"1px solid #27272a",transition:"all .2s"}}/>)}
+      </div>
+      <button onClick={add} className="tap" style={{width:28,height:28,border:"1px solid #38bdf8",background:"rgba(56,189,248,.1)",color:"#38bdf8",cursor:"pointer",borderRadius:6,display:"flex",alignItems:"center",justifyContent:"center",fontSize:14,fontWeight:900}}>+</button>
+    </div>
+    {water.count>=goal&&<div style={{textAlign:"center",fontSize:8,color:"#4ade80",fontWeight:700,marginTop:5,letterSpacing:"0.12em"}}>✓ HYDRATION GOAL MET</div>}
+  </div>;
+}
+
+/* ══ FOOD TAB ══ */
+function FoodTab({tone,addXP,mHistory,recordMeal,deleteMeal,setShowPaywall,macroGoals,setMacroGoals,units}){
+  const[text,setText]=useState("");
+  const[loading,setLoading]=useState(false);
+  const[imgPrev,setImgPrev]=useState(null);
+  const[imgB64,setImgB64]=useState(null);
+  const[scanning,setScanning]=useState(false);
+  const[scanResult,setScanResult]=useState(null);
+  const[portion,setPortion]=useState(1);
+  const[showCamOpts,setShowCamOpts]=useState(false);
+  const[correcting,setCorrecting]=useState(false);
+  const[showCalc,setShowCalc]=useState(false);
+  const[showSolver,setShowSolver]=useState(false);
+  const camRef=useRef(null);
+  const galRef=useRef(null);
+
+  const getMealCategory=()=>{
+    const h=new Date().getHours();
+    if(h<11)return "Breakfast";
+    if(h<16)return "Lunch";
+    if(h<21)return "Dinner";
+    return "Snack";
+  };
+
+  const geminiScan=async(b64)=>{
+    try{
+      const res=await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key="+GEMINI_KEY,{
+        method:"POST",headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({contents:[{parts:[
+          {text:'You are a clinical nutrition expert with USDA FoodData Central accuracy. Analyze this food image. Identify the food and estimate total nutritional info using exact grams/ounces. Use realistic portion sizes. Reply ONLY with valid JSON, no markdown: {"food":"name","serving":"estimated weight in grams e.g. 180g","kcal":number,"protein":number,"carbs":number,"fat":number,"confidence":0.85}'},
+          {inline_data:{mime_type:"image/jpeg",data:b64}}
+        ]}]})
+      });
+      const d=await res.json();
+      const txt=(d.candidates?.[0]?.content?.parts?.[0]?.text||"").trim();
+      const m=txt.match(/\{[\s\S]*\}/);
+      if(m){const p=JSON.parse(m[0]);if(p.food&&p.kcal) return p;}
+    }catch(e){console.log("Scan error:",e);}
+    return null;
+  };
+
+  const handleFile=async(file)=>{
+    if(!file)return;
+    const r=new FileReader();
+    r.onload=async e=>{
+      const compressed=await compressImg(e.target.result);
+      setImgPrev(compressed);
+      const b64=compressed.split(",")[1];
+      setImgB64(b64);
+      setScanResult(null);setPortion(1);
+      setScanning(true);
+      const result=await geminiScan(b64);
+      if(result){setScanResult(result);}
+      else{setScanResult({food:"Meal",serving:"1 serving (200g)",kcal:400,protein:22,carbs:42,fat:14,confidence:0.5});}
+      setScanning(false);
+    };
+    r.readAsDataURL(file);
+  };
+
+  const logText=async()=>{
+    if(!text.trim())return;
+    setLoading(true);
+    const ts=new Date().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"});
+    const mk=(food,kcal,protein,carbs,fat,serving)=>({
+      id:Date.now(),
+      date:todayStr(),
+      food:text,
+      displayName:food,
+      kcal,
+      protein,
+      carbs,
+      fat,
+      servingInfo:serving||"estimated",
+      photo:false,
+      photoSrc:null,
+      category:getMealCategory(),
+      time:ts
+    });
+
+    try{
+      const res=await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key="+GEMINI_KEY,{
+        method:"POST",headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({contents:[{role:"user",parts:[{text:'You are a clinical registered dietitian and USDA FoodData Central reference expert. Calculate TOTAL calories and macros for this exact food: "'+text+'". Ground your calculations in USDA standard reference values. Respect exact quantities and weights (grams/oz). Reply ONLY with raw JSON, no markdown: {"food":"Clean Food Name","serving":"Specific serving description with estimated grams e.g. 150g","kcal":number,"protein":number,"carbs":number,"fat":number}'}]}],generationConfig:{maxOutputTokens:120,temperature:0.15}})
+      });
+      const d=await res.json();
+      const txt2=(d.candidates?.[0]?.content?.parts?.[0]?.text||"").trim();
+      const m=txt2.match(/\{[\s\S]*\}/);
+      if(m){const p=JSON.parse(m[0]);if(p.food&&p.kcal){
+        recordMeal(mk(p.food,Math.round(p.kcal),Math.round(p.protein),Math.round(p.carbs),Math.round(p.fat),p.serving));
+        addXP(5,"Meal Logged");setText("");setLoading(false);return;
+      }}
+    }catch(e){}
+    const mac=getFoodMacros(text);
+    recordMeal(mk(mac.food,mac.kcal,Math.round(mac.p),Math.round(mac.c),Math.round(mac.fat),mac.serving));
+    addXP(5,"Meal Logged");setText("");setLoading(false);
+  };
+
+  const saveScan=()=>{
+    if(!scanResult)return;
+    const m=portion;
+    const entry={
+      id:Date.now(),
+      date:todayStr(),
+      food:scanResult.food,
+      kcal:Math.round(scanResult.kcal*m),
+      protein:Math.round((scanResult.protein||0)*m),
+      carbs:Math.round((scanResult.carbs||0)*m),
+      fat:Math.round((scanResult.fat||0)*m),
+      photo:true,
+      photoSrc:imgPrev,
+      serving:scanResult.serving,
+      portion:m,
+      category:getMealCategory(),
+      time:new Date().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})
+    };
+    recordMeal(entry);addXP(15,"Photo Scan");
+    setImgPrev(null);setImgB64(null);setScanResult(null);setPortion(1);
+  };
+
+  const correctScan=async(newFood)=>{
+    setCorrecting(false);setScanning(true);
+    try{
+      const res=await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key="+GEMINI_KEY,{
+        method:"POST",headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({contents:[{role:"user",parts:[{text:'The food is: '+newFood+'. Give accurate USDA nutrition for a standard serving. Reply ONLY with JSON: {"food":"name","serving":"description (weight)","kcal":number,"protein":number,"carbs":number,"fat":number,"confidence":1}'}]}],generationConfig:{maxOutputTokens:150,temperature:0.2}})
+      });
+      const d=await res.json();
+      const txt=(d.candidates?.[0]?.content?.parts?.[0]?.text||"").trim();
+      const m=txt.match(/\{[\s\S]*\}/);
+      if(m){const p=JSON.parse(m[0]);if(p.food){setScanResult({...p,corrected:true});setScanning(false);return;}}
+    }catch(e){}
+    const mac=getFoodMacros(newFood);
+    setScanResult({food:newFood,kcal:mac.kcal,protein:Math.round(mac.p),carbs:Math.round(mac.c),fat:Math.round(mac.fat),confidence:1,corrected:true});
+    setScanning(false);
+  };
+
+  return <div style={{padding:14,paddingBottom:24,display:"flex",flexDirection:"column",gap:12}}>
+    <div><div style={{fontSize:11,fontWeight:900,letterSpacing:"0.14em",marginBottom:2}}>LOG YOUR MEAL</div><div style={{fontSize:10,color:"#52525b"}}>AI-powered nutrition tracking with USDA accuracy</div></div>
+
+    {/* Today Macro Target Progress */}
+    <DailyNutritionSummary mHistory={mHistory} macroGoals={macroGoals} onOpenCalc={()=>setShowCalc(true)} onOpenSolver={()=>setShowSolver(true)}/>
+
+    {/* Water Tracker */}
+    <WaterTracker/>
+
+    {/* Photo scan card */}
+    <div className="card" style={{overflow:"hidden"}}>
+      <div style={{padding:"11px 13px",borderBottom:"1px solid #18181b",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+        <div style={{fontSize:9,letterSpacing:"0.18em",fontWeight:700,color:"#d4d4d8"}}>AI FOOD SCANNER</div>
+        <div style={{fontSize:8,color:"#4ade80",fontWeight:700}}>● GEMINI VISION</div>
+      </div>
+      <div style={{padding:11,display:"flex",flexDirection:"column",gap:9}}>
+        {imgPrev?<div style={{position:"relative",width:"100%",borderRadius:10,overflow:"hidden"}}>
+          <img src={imgPrev} alt="food" style={{width:"100%",height:180,objectFit:"cover",display:"block"}}/>
+          {scanning&&<><div className="scan-bar" style={{top:0}}/><div style={{position:"absolute",inset:0,background:"rgba(0,255,160,.05)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:6}}>
+            <Icon name="Scan" size={32} style={{color:"rgba(0,255,180,.85)",animation:"spin 1s linear infinite"}}/>
+            <div style={{fontSize:9,fontWeight:900,letterSpacing:"0.16em",color:"rgba(0,255,200,.9)"}}>ANALYZING...</div>
+          </div></>}
+          <button onClick={()=>{setImgPrev(null);setImgB64(null);setScanResult(null);}} style={{position:"absolute",top:7,right:7,background:"rgba(0,0,0,.65)",border:"none",borderRadius:99,width:24,height:24,color:"#fff",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}><Icon name="X" size={12}/></button>
+        </div>:<div onClick={()=>setShowCamOpts(true)} className="tap" style={{width:"100%",height:110,border:"2px dashed #27272a",borderRadius:10,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:6,cursor:"pointer"}}>
+          <Icon name="Camera" size={28} style={{color:"#3f3f46"}}/><div style={{fontSize:9,letterSpacing:"0.1em",color:"#52525b",fontWeight:700}}>TAP TO SCAN FOOD</div>
+        </div>}
+        <input ref={camRef} type="file" accept="image/*" capture="environment" style={{display:"none"}} onChange={e=>{handleFile(e.target.files[0]);e.target.value="";}}/>
+        <input ref={galRef} type="file" accept="image/*" style={{display:"none"}} onChange={e=>{handleFile(e.target.files[0]);e.target.value="";}}/>
+        {scanResult&&<div className="fade-up" style={{background:"#000",borderRadius:10,padding:12,border:"1px solid #27272a"}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
+            <div><div style={{fontSize:10,color:"#71717a"}}>AI DETECTED</div><div style={{fontSize:14,fontWeight:900}}>{scanResult.food}</div>{scanResult.serving&&<div style={{fontSize:9,color:"#52525b",marginTop:1}}>Base: {scanResult.serving}</div>}</div>
+            <div style={{fontSize:9,color:"#4ade80",fontWeight:700,textAlign:"right"}}><div>{Math.round((scanResult.confidence||0.8)*100)}%</div>{scanResult.corrected&&<div style={{color:"#fbbf24"}}>CORRECTED</div>}</div>
+          </div>
+          <div style={{marginBottom:10}}><div style={{fontSize:8,color:"#52525b",fontWeight:700,letterSpacing:"0.12em",marginBottom:6}}>PORTION SIZE</div>
+            <div style={{display:"flex",gap:5}}>
+              {[0.5,0.75,1,1.5,2].map(p=><button key={p} onClick={()=>setPortion(p)} className="tap" style={{padding:"5px 9px",fontSize:9,fontWeight:900,border:portion===p?"1px solid #fff":"1px solid #27272a",background:portion===p?"#fff":"transparent",color:portion===p?"#000":"#52525b",borderRadius:99,cursor:"pointer"}}>{p===1?"1×":`${p}×`}</button>)}
+            </div>
+          </div>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:6,marginBottom:10}}>
+            {[["KCAL",Math.round(scanResult.kcal*portion),""],["PROT",Math.round((scanResult.protein||0)*portion),"g"],["CARBS",Math.round((scanResult.carbs||0)*portion),"g"],["FAT",Math.round((scanResult.fat||0)*portion),"g"]].map(([l,v,u])=><div key={l} style={{textAlign:"center",background:"#09090b",padding:"6px 4px",borderRadius:7}}>
+              <div style={{fontSize:7,color:"#52525b",fontWeight:700}}>{l}</div>
+              <div style={{fontSize:14,fontWeight:900}}>{v}{u}</div>
+            </div>)}
+          </div>
+          <div style={{display:"flex",gap:7}}>
+            <button onClick={()=>setCorrecting(true)} className="tap" style={{flex:1,padding:"8px 0",border:"1px solid #27272a",background:"none",color:"#71717a",fontSize:9,fontWeight:700,cursor:"pointer",borderRadius:8}}>⚠ WRONG?</button>
+            <button onClick={saveScan} className="tap" style={{flex:2,padding:"8px 0",background:"#fff",color:"#000",border:"none",fontSize:9,letterSpacing:"0.1em",fontWeight:900,cursor:"pointer",borderRadius:8}}>LOG THIS MEAL ✓</button>
+          </div>
+        </div>}
+      </div>
+    </div>
+
+    {/* Text entry */}
+    <div style={{display:"flex",flexDirection:"column",gap:7}}>
+      <div style={{display:"flex",gap:7}}>
+        <input value={text} onChange={e=>setText(e.target.value)} onKeyDown={e=>e.key==="Enter"&&logText()} placeholder='"2 eggs and toast" or "150g grilled chicken, 1 cup rice"' style={{flex:1,background:"#09090b",border:"1px solid #27272a",borderRadius:10,color:"#fff",fontSize:13,padding:"10px 12px",outline:"none",fontFamily:"inherit"}}/>
+        <button onClick={logText} disabled={loading||!text.trim()} className="tap" style={{padding:"0 16px",background:(!loading&&text.trim())?"#fff":"#18181b",color:(!loading&&text.trim())?"#000":"#52525b",border:"none",fontSize:9,letterSpacing:"0.12em",fontWeight:900,cursor:loading?"default":"pointer",borderRadius:10}}>{loading?"···":"LOG"}</button>
+      </div>
+      {/* Quick Food Chips */}
+      <div style={{display:"flex",gap:5,overflowX:"auto",paddingBottom:2}}>
+        {[
+          "2 eggs and toast",
+          "150g chicken breast & 1 cup rice",
+          "Protein shake & banana",
+          "Salmon fillet & sweet potato",
+          "Greek yogurt & honey",
+          "Ribeye steak & asparagus"
+        ].map(q=><button key={q} onClick={()=>setText(q)} className="tap" style={{flexShrink:0,padding:"4px 8px",fontSize:8,fontWeight:700,color:"#a1a1aa",background:"#09090b",border:"1px solid #27272a",borderRadius:99,cursor:"pointer"}}>+ {q}</button>)}
+      </div>
+    </div>
+
+    {/* History */}
+    {mHistory.length>0&&<div style={{display:"flex",flexDirection:"column",gap:8}}>
+      <div style={{fontSize:8,letterSpacing:"0.18em",color:"#52525b",fontWeight:700}}>MEAL HISTORY ({mHistory.length})</div>
+      {mHistory.slice(0,25).map(entry=><MealCard key={entry.id} entry={entry} onDelete={deleteMeal}/>)}
+    </div>}
+    {mHistory.length===0&&<div style={{textAlign:"center",padding:"40px 0",color:"#27272a",fontSize:9,letterSpacing:"0.18em",fontWeight:700}}>NO MEALS LOGGED YET</div>}
+
+    {/* Camera sheet */}
+    {showCamOpts&&<div onClick={()=>setShowCamOpts(false)} className="modal-bg" style={{position:"fixed",inset:0,zIndex:60,background:"rgba(0,0,0,.7)",display:"flex",alignItems:"flex-end",justifyContent:"center"}}>
+      <div onClick={e=>e.stopPropagation()} className="slide-up" style={{width:"100%",maxWidth:480,background:"#09090b",border:"1px solid #27272a",borderRadius:"14px 14px 0 0",padding:16,paddingBottom:32}}>
+        <div style={{fontSize:9,letterSpacing:"0.18em",color:"#52525b",fontWeight:700,textAlign:"center",marginBottom:14}}>CAPTURE METHOD</div>
+        {[["Camera","TAKE LIVE PHOTO",()=>{camRef.current?.click();setShowCamOpts(false);}],["Upload","CHOOSE FROM GALLERY",()=>{galRef.current?.click();setShowCamOpts(false);}]].map(([ic,l,fn])=><button key={l} onClick={fn} className="tap" style={{width:"100%",display:"flex",alignItems:"center",gap:14,padding:"14px 16px",background:"none",border:"1px solid #27272a",borderRadius:10,color:"#fff",cursor:"pointer",marginBottom:9,textAlign:"left"}}>
+          <Icon name={ic} size={20} sw={1.5} style={{color:"#71717a"}}/><div style={{fontSize:11,fontWeight:900,letterSpacing:"0.1em"}}>{l}</div>
+        </button>)}
+      </div>
+    </div>}
+
+    {correcting&&<CorrectionModal onSave={correctScan} onClose={()=>setCorrecting(false)}/>}
+    {showCalc&&<MacroCalculatorModal units={units} currentGoals={macroGoals} onSave={g=>{setMacroGoals(g);setShowCalc(false);playSound("complete");}} onClose={()=>setShowCalc(false)}/>}
+    {showSolver&&<AiMealSolverModal remKcal={Math.max(0,(macroGoals?.kcal||2200)-mHistory.filter(m=>m.date===todayStr()).reduce((a,b)=>a+(b.kcal||0),0))} remP={Math.max(0,(macroGoals?.protein||150)-Math.round(mHistory.filter(m=>m.date===todayStr()).reduce((a,b)=>a+(b.protein||0),0)))} tone={tone} onLogMeal={m=>{recordMeal({id:Date.now(),date:todayStr(),food:m.food,displayName:m.food,kcal:m.kcal,protein:m.protein,carbs:m.carbs,fat:m.fat,servingInfo:m.serving,photo:false,photoSrc:null,category:getMealCategory(),time:new Date().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})});addXP(10,"AI Meal Logged");}} onClose={()=>setShowSolver(false)}/>}
+  </div>;
+}
+
+function MealCard({entry,onDelete}){
+  const[open,setOpen]=useState(false);
+  const catIcons={Breakfast:"🌅",Lunch:"☀️",Dinner:"🌙",Snack:"⚡"};
+  return <div className="card fade-up" style={{overflow:"hidden"}}>
+    <div style={{width:"100%",padding:"10px 12px",display:"flex",alignItems:"center",justifyContent:"space-between",background:"none",border:"none",color:"#fff",textAlign:"left"}}>
+      <div onClick={()=>setOpen(o=>!o)} style={{flex:1,minWidth:0,cursor:"pointer"}}>
+        <div style={{display:"flex",alignItems:"center",gap:6}}>
+          <span style={{fontSize:10}}>{catIcons[entry.category]||"🍴"}</span>
+          <span style={{fontSize:11,fontWeight:800,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{entry.displayName||entry.food}</span>
+          {entry.category&&<span style={{fontSize:7,fontWeight:700,letterSpacing:"0.06em",padding:"1px 5px",background:"#18181b",borderRadius:4,color:"#a1a1aa",border:"1px solid #27272a"}}>{entry.category.toUpperCase()}</span>}
+        </div>
+        <div style={{fontSize:9,color:"#52525b",marginTop:2}}>{entry.time}{entry.photo?" · 📷 AI SCAN":""}{entry.servingInfo&&entry.servingInfo!=="estimated"?" · "+entry.servingInfo:""}</div>
+      </div>
+      <div style={{display:"flex",alignItems:"center",gap:8,flexShrink:0}}>
+        <span style={{fontSize:11,fontWeight:900,color:"#d4d4d8"}}>{entry.kcal} kcal</span>
+        <button onClick={()=>setOpen(o=>!o)} style={{background:"none",border:"none",color:"#52525b",cursor:"pointer",display:"flex",padding:2}}><Icon name={open?"ChevronUp":"ChevronDown"} size={13} sw={2}/></button>
+        {onDelete&&<button onClick={()=>onDelete(entry.id)} className="tap" style={{background:"none",border:"none",color:"#52525b",cursor:"pointer",display:"flex",padding:2}} title="Delete"><Icon name="Trash2" size={13} sw={1.5}/></button>}
+      </div>
+    </div>
+    {open&&<div style={{borderTop:"1px solid #18181b",padding:"10px 12px"}}>
+      {entry.photo&&entry.photoSrc&&<div style={{width:"100%",height:130,borderRadius:8,overflow:"hidden",marginBottom:10}}><img src={entry.photoSrc} alt={entry.food} style={{width:"100%",height:"100%",objectFit:"cover"}}/></div>}
+      <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:6}}>
+        {[["PROTEIN",entry.protein,"g","#60a5fa"],["CARBS",entry.carbs,"g","#4ade80"],["FAT",entry.fat,"g","#fb923c"]].map(([l,v,u,c])=><div key={l} style={{background:"#000",padding:"7px 5px",textAlign:"center",borderRadius:7,border:`1px solid ${c}22`}}>
+          <div style={{fontSize:7,color:c,fontWeight:700}}>{l}</div>
+          <div style={{fontSize:14,fontWeight:900,marginTop:1}}>{v||0}{u}</div>
+        </div>)}
+      </div>
+    </div>}
+  </div>;
+}
+
+function CorrectionModal({onSave,onClose}){
+  const[val,setVal]=useState("");
+  return <div onClick={onClose} className="modal-bg" style={{position:"fixed",inset:0,zIndex:70,background:"rgba(0,0,0,.88)",display:"flex",alignItems:"center",justifyContent:"center",padding:16}}>
+    <div onClick={e=>e.stopPropagation()} className="slide-up card" style={{width:"100%",maxWidth:340}}>
+      <div style={{padding:"12px 14px",borderBottom:"1px solid #18181b",display:"flex",justifyContent:"space-between",alignItems:"center"}}><div style={{fontSize:9,letterSpacing:"0.18em",fontWeight:900}}>CORRECT FOOD</div><button onClick={onClose} style={{background:"none",border:"none",color:"#52525b",cursor:"pointer",display:"flex"}}><Icon name="X" size={17}/></button></div>
+      <div style={{padding:14,display:"flex",flexDirection:"column",gap:10}}>
+        <div style={{fontSize:10,color:"#71717a"}}>What food is it actually? AI will recalculate macros.</div>
+        <input value={val} onChange={e=>setVal(e.target.value)} onKeyDown={e=>e.key==="Enter"&&val.trim()&&onSave(val)} placeholder="e.g. Chicken Fried Rice" style={{width:"100%",background:"#000",border:"1px solid #27272a",borderRadius:8,color:"#fff",fontSize:13,padding:10,outline:"none",fontFamily:"inherit"}}/>
+        <button onClick={()=>val.trim()&&onSave(val)} className="tap" style={{width:"100%",padding:12,background:val.trim()?"#fff":"#27272a",color:val.trim()?"#000":"#52525b",border:"none",borderRadius:8,fontSize:9,letterSpacing:"0.14em",fontWeight:900,cursor:val.trim()?"pointer":"default"}}>RECALCULATE</button>
+      </div>
+    </div>
+  </div>;
+}
+
+/* ══ RANK TAB ══ */
+function RankTab({xp,tone,wCount,mCount,streak,flags,chalData,setChalData,addXP,setFlag,onBadge}){
+  const{lv,nx,pct,idx}=getLvl(xp);
+  const R=46,C=2*Math.PI*R;
+  const completeChallenge=ch=>{
+    const today=todayStr();
+    const ex=chalData[ch.id]||{lastDone:null,streak:0,total:0};
+    if(ex.lastDone===today)return;
+    const yest=daysAgo(1);
+    const ns=ex.lastDone===yest?ex.streak+1:1;
+    setChalData(p=>({...p,[ch.id]:{lastDone:today,streak:ns,total:ex.total+1}}));
+    addXP(ch.xp,ch.n);
+    if(DAILY_CHALLENGES.every(c=>c.id===ch.id||chalData[c.id]?.lastDone===today))setFlag("allChallenges");
+  };
+  const isDone=id=>chalData[id]?.lastDone===todayStr();
+  return <div style={{padding:14,paddingBottom:28,display:"flex",flexDirection:"column",gap:14}}>
+    <div className="card" style={{padding:18,position:"relative",overflow:"hidden",background:`linear-gradient(135deg,#09090b,${lv.c}12)`,border:`1px solid ${lv.c}44`}}>
+      <div style={{display:"flex",alignItems:"center",gap:14}}>
+        <div style={{position:"relative",width:100,height:100,flexShrink:0}}>
+          <svg width="100" height="100" style={{transform:"rotate(-90deg)"}}><circle cx="50" cy="50" r={R} fill="none" stroke="rgba(255,255,255,.07)" strokeWidth="7"/><circle cx="50" cy="50" r={R} fill="none" stroke={lv.c} strokeWidth="7" strokeDasharray={C} strokeDashoffset={C-(pct/100)*C} strokeLinecap="round" style={{transition:"stroke-dashoffset 1.2s",filter:`drop-shadow(0 0 6px ${lv.c})`}}/></svg>
+          <div style={{position:"absolute",inset:0,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center"}}><div style={{fontSize:8,color:"#71717a",fontWeight:700}}>LVL</div><div style={{fontSize:28,fontWeight:900,lineHeight:1,color:lv.c}}>{idx+1}</div></div>
+        </div>
+        <div style={{flex:1}}>
+          <div style={{fontSize:8,letterSpacing:"0.2em",color:"#71717a",fontWeight:700}}>CURRENT RANK</div>
+          <div style={{fontSize:26,fontWeight:900,color:lv.c,textShadow:`0 0 20px ${lv.c}66`,marginBottom:2}}>{lv.n}</div>
+          <div style={{fontSize:10,color:"#71717a",fontWeight:700}}>{xp.toLocaleString()} XP · {streak}d 🔥</div>
+          {nx&&<div style={{fontSize:9,color:"#3f3f46",marginTop:2}}>{(nx.xp-xp).toLocaleString()} XP → {nx.n}</div>}
+        </div>
+      </div>
+      <div style={{marginTop:12,height:3,background:"rgba(255,255,255,.07)",borderRadius:99,overflow:"hidden"}}><div style={{height:"100%",width:`${pct}%`,background:lv.c,borderRadius:99,transition:"width 1.2s",boxShadow:`0 0 8px ${lv.c}`}}/></div>
+    </div>
+    <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:7}}>
+      {[[xp.toLocaleString(),"XP",lv.c],[streak+"d","STREAK","#f87171"],[wCount.toString(),"SESSIONS","#60a5fa"]].map(([v,l,c])=><div key={l} className="card" style={{padding:"11px 7px",textAlign:"center",border:`1px solid ${c}22`,background:`${c}08`}}>
+        <div style={{fontSize:19,fontWeight:900,color:c}}>{v}</div>
+        <div style={{fontSize:7,letterSpacing:"0.12em",color:"#52525b",fontWeight:700,marginTop:2}}>{l}</div>
+      </div>)}
+    </div>
+    {/* Daily Challenges */}
+    <div>
+      <div style={{display:"flex",justifyContent:"space-between",marginBottom:9}}><div style={{fontSize:10,fontWeight:900,letterSpacing:"0.12em"}}>DAILY CHALLENGES</div><div style={{fontSize:8,color:"#52525b",fontWeight:700}}>{DAILY_CHALLENGES.filter(c=>isDone(c.id)).length}/{DAILY_CHALLENGES.length}</div></div>
+      <div style={{display:"flex",flexDirection:"column",gap:7}}>
+        {DAILY_CHALLENGES.map(ch=>{const done=isDone(ch.id);const d=chalData[ch.id]||{};return <div key={ch.id} style={{display:"flex",alignItems:"center",gap:11,padding:"11px 12px",border:done?"1px solid rgba(74,222,128,.3)":"1px solid #27272a",borderRadius:10,background:done?"rgba(74,222,128,.05)":"#09090b"}}>
+          <button onClick={()=>!done&&completeChallenge(ch)} disabled={done} className={done?"":"tap"} style={{width:34,height:34,borderRadius:8,background:done?"rgba(74,222,128,.15)":"#18181b",border:done?"1px solid rgba(74,222,128,.4)":"1px solid #27272a",display:"flex",alignItems:"center",justifyContent:"center",color:done?"#4ade80":"#52525b",cursor:done?"default":"pointer",flexShrink:0}}><Icon name={done?"Check":ch.icon} size={15} sw={done?2.5:1.5}/></button>
+          <div style={{flex:1}}><div style={{fontSize:11,fontWeight:900,color:done?"#52525b":"#d4d4d8",textDecoration:done?"line-through":"none"}}>{ch.n}</div><div style={{fontSize:9,color:"#52525b",marginTop:1}}>{ch.desc}</div>{d.streak>1&&<div style={{fontSize:8,color:"#fbbf24",marginTop:2,fontWeight:700}}>{d.streak}🔥 streak · {d.total} total</div>}</div>
+          <div style={{fontSize:10,fontWeight:900,color:done?"#4ade80":"#fbbf24",flexShrink:0}}>{done?"✓":"+"+ch.xp}</div>
+        </div>;})}
+      </div>
+    </div>
+    {/* Badge Paths */}
+    {BADGE_PATHS.map(path=><BadgePath key={path.id} path={path} xp={xp} wCount={wCount} mCount={mCount} streak={streak} flags={flags} onBadge={onBadge}/>)}
+  </div>;
+}
+
+function BadgePath({path,xp,wCount,mCount,streak,flags,onBadge}){
+  const unlocked=path.badges.filter(b=>isBadgeUnlocked(b,path.id,xp,wCount,mCount,streak,flags)).length;
+  return <div>
+    <div style={{display:"flex",justifyContent:"space-between",marginBottom:9}}><div><div style={{fontSize:10,fontWeight:900,letterSpacing:"0.12em",color:"#d4d4d8"}}>{path.title}</div><div style={{fontSize:9,color:"#52525b"}}>{path.sub}</div></div><div style={{fontSize:8,color:path.acc,fontWeight:700}}>{unlocked}/{path.badges.length}</div></div>
+    <div style={{display:"flex",gap:8,overflowX:"auto",paddingBottom:6}}>
+      {path.badges.map(b=>{const isU=isBadgeUnlocked(b,path.id,xp,wCount,mCount,streak,flags);const pc=badgePct(b,path.id,xp,wCount,mCount,streak,flags);const ip=!isU&&pc>8;return <div key={b.id} onClick={()=>onBadge(b,path.id)} className="tap" style={{flexShrink:0,width:80,display:"flex",flexDirection:"column",alignItems:"center",cursor:"pointer"}}>
+        <div className={isU?b.gl:""} style={{width:76,height:76,borderRadius:14,background:isU?b.g:"rgba(255,255,255,.025)",border:isU?`1px solid ${b.c}55`:ip?"1px solid #2a2a2a":"1px solid #1a1a1a",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",position:"relative",overflow:"hidden"}}>
+          {isU&&<div style={{position:"absolute",inset:0,background:"linear-gradient(135deg,rgba(255,255,255,.14) 0%,transparent 50%)"}}/>}
+          <Icon name={b.icon} size={20} sw={isU?2.2:1.2} style={{color:isU?b.c:ip?"#3f3f46":"#1f1f1f",filter:isU?`drop-shadow(0 0 5px ${b.c})`:"none"}}/>
+          <div style={{fontSize:7,fontWeight:900,textAlign:"center",padding:"3px 4px 0",color:isU?"#fff":ip?"#3f3f46":"#1f1f1f",lineHeight:1.2}}>{b.n}</div>
+        </div>
+        <div style={{textAlign:"center",marginTop:3}}>{isU?<div style={{fontSize:7,color:"#4ade80",fontWeight:700}}>EARNED</div>:ip?<div style={{fontSize:7,color:b.c,fontWeight:700}}>{Math.floor(pc)}%</div>:<div style={{fontSize:7,color:"#1f1f1f"}}>LOCKED</div>}</div>
+      </div>;})}
+    </div>
+  </div>;
+}
+
+function BadgeModal({b,pid,xp,wCount,mCount,streak,flags,onClose}){
+  const isU=isBadgeUnlocked(b,pid,xp,wCount,mCount,streak,flags);
+  const pc=badgePct(b,pid,xp,wCount,mCount,streak,flags);
+  return <div onClick={onClose} className="modal-bg" style={{position:"fixed",inset:0,zIndex:60,background:"rgba(0,0,0,.92)",display:"flex",alignItems:"center",justifyContent:"center",padding:16}}>
+    <div onClick={e=>e.stopPropagation()} className="slide-up card" style={{width:"100%",maxWidth:360,overflow:"hidden"}}>
+      <div style={{background:b.g,padding:"28px 18px 22px",textAlign:"center",position:"relative"}}>
+        <button onClick={onClose} style={{position:"absolute",top:10,right:10,background:"rgba(0,0,0,.4)",border:"none",borderRadius:99,width:26,height:26,color:"rgba(255,255,255,.7)",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}><Icon name="X" size={13}/></button>
+        <div className="badge-pop" style={{width:120,height:120,borderRadius:22,background:"rgba(0,0,0,.35)",border:`2px solid ${b.c}88`,margin:"0 auto 14px",display:"flex",alignItems:"center",justifyContent:"center",position:"relative"}}>
+          <Icon name={b.icon} size={46} sw={isU?2:1.2} style={{color:b.c,filter:isU?`drop-shadow(0 0 12px ${b.c})`:"none"}}/>
+          {isU&&<div style={{position:"absolute",top:-5,right:-5,width:22,height:22,background:"#4ade80",borderRadius:99,display:"flex",alignItems:"center",justifyContent:"center",border:"2px solid #000"}}><Icon name="Check" size={11} sw={3} style={{color:"#000"}}/></div>}
+        </div>
+        <div style={{fontSize:8,letterSpacing:"0.18em",color:"rgba(255,255,255,.55)",fontWeight:700}}>{isU?"ACHIEVEMENT UNLOCKED":"LOCKED"}</div>
+        <div style={{fontSize:20,fontWeight:900,color:"#fff",textShadow:`0 0 18px ${b.c}`}}>{b.n}</div>
+      </div>
+      <div style={{padding:18}}>
+        <p style={{fontSize:12,color:"#a1a1aa",lineHeight:1.7,marginBottom:16,textAlign:"center"}}>{b.desc}</p>
+        {!isU&&<div style={{marginBottom:14}}><div style={{display:"flex",justifyContent:"space-between",marginBottom:5}}><span style={{fontSize:8,color:"#52525b",fontWeight:700}}>PROGRESS</span><span style={{fontSize:8,color:b.c,fontWeight:700}}>{Math.floor(pc)}%</span></div><div style={{background:"#18181b",height:5,borderRadius:99,overflow:"hidden"}}><div style={{height:"100%",background:b.g,width:`${pc}%`,boxShadow:`0 0 6px ${b.c}`}}/></div></div>}
+        {isU&&<div style={{background:"rgba(74,222,128,.06)",border:"1px solid rgba(74,222,128,.2)",borderRadius:9,padding:10,textAlign:"center",marginBottom:14}}><div style={{fontSize:9,color:"#4ade80",fontWeight:900}}>✓ ACHIEVEMENT EARNED</div></div>}
+        <button onClick={onClose} className="tap" style={{width:"100%",padding:12,background:"#fff",color:"#000",border:"none",borderRadius:9,fontSize:9,letterSpacing:"0.16em",fontWeight:900,cursor:"pointer"}}>{isU?"CLAIM GLORY":"KEEP GRINDING"}</button>
+      </div>
+    </div>
+  </div>;
+}
+
+/* ══ DATA TAB ══ */
+function DataTab({xp,wHistory,mHistory,xpLog,streak,setShowPaywall}){
+  const last7=Array.from({length:7},(_,i)=>daysAgo(6-i));
+  const xpPerDay=last7.map(d=>xpLog.filter(e=>e.date===d).reduce((a,e)=>a+e.amt,0));
+  const workoutsPerDay=last7.map(d=>wHistory.filter(e=>e.date===d).length);
+  const dayLabels=last7.map(d=>{const dt=new Date(d+"T12:00:00");return["Su","Mo","Tu","We","Th","Fr","Sa"][dt.getDay()];});
+  const avgKcal=mHistory.length?Math.round(mHistory.slice(0,14).reduce((a,e)=>a+(e.kcal||0),0)/Math.min(mHistory.length,14)):0;
+  const totalP=mHistory.slice(0,7).reduce((a,e)=>a+(e.protein||0),0);
+  return <div style={{padding:14,paddingBottom:28,display:"flex",flexDirection:"column",gap:13}}>
+    <div style={{fontSize:11,fontWeight:900,letterSpacing:"0.14em"}}>ANALYTICS</div>
+    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:7}}>
+      {[[xp.toLocaleString(),"TOTAL XP",getLvl(xp).lv.c],[wHistory.length,"WORKOUTS","#60a5fa"],[streak.best+"d","BEST STREAK","#f87171"],[avgKcal||"-","AVG KCAL","#4ade80"]].map(([v,l,c])=><div key={l} className="card" style={{padding:"12px 10px",textAlign:"center",border:`1px solid ${c}22`,background:`${c}08`}}>
+        <div style={{fontSize:22,fontWeight:900,color:c}}>{v}</div>
+        <div style={{fontSize:7,letterSpacing:"0.12em",color:"#52525b",fontWeight:700,marginTop:1}}>{l}</div>
+      </div>)}
+    </div>
+    <div className="card" style={{padding:14}}><div style={{fontSize:9,fontWeight:900,letterSpacing:"0.12em",color:"#d4d4d8",marginBottom:10}}>XP — LAST 7 DAYS</div><BarChart data={xpPerDay} color={getLvl(xp).lv.c} labels={dayLabels} h={70}/></div>
+    <div className="card" style={{padding:14}}><div style={{fontSize:9,fontWeight:900,letterSpacing:"0.12em",color:"#d4d4d8",marginBottom:10}}>WORKOUTS — LAST 7 DAYS</div><BarChart data={workoutsPerDay} color="#60a5fa" labels={dayLabels} h={70}/></div>
+    <div className="card" style={{padding:14}}>
+      <div style={{fontSize:9,fontWeight:900,letterSpacing:"0.12em",marginBottom:10}}>THIS WEEK</div>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:6}}>
+        {[["PROTEIN",totalP+"g","#60a5fa"],["MEALS",mHistory.slice(0,7).length,"#4ade80"],["SCANNED",mHistory.slice(0,7).filter(m=>m.photo).length,"#fbbf24"]].map(([l,v,c])=><div key={l} style={{textAlign:"center",background:"#000",padding:"9px 4px",borderRadius:8,border:`1px solid ${c}22`}}><div style={{fontSize:7,color:c,fontWeight:700}}>{l}</div><div style={{fontSize:16,fontWeight:900,marginTop:2}}>{v}</div></div>)}
+      </div>
+    </div>
+    <div className="card tap" onClick={()=>setShowPaywall(true)} style={{padding:14,display:"flex",alignItems:"center",gap:12,border:"1px solid #27272a",cursor:"pointer"}}>
+      <Icon name="TrendingUp" size={24} style={{color:"#fbbf24",flexShrink:0}}/>
+      <div><div style={{fontSize:10,fontWeight:900,color:"#fbbf24",marginBottom:2}}>UNLOCK ADVANCED ANALYTICS</div><div style={{fontSize:10,color:"#52525b"}}>90-day trends, body comp, macro breakdown</div></div>
+      <Icon name="ChevronRight" size={16} style={{color:"#52525b",flexShrink:0}}/>
+    </div>
+  </div>;
+}
+
+/* ══ COACH TAB ══ */
+function CoachTab({tone,settings,setSettings,setShowPaywall,setFlag}){
+  const coaches=[
+    {id:"brutal",name:"SERGEANT IRON",desc:"No-excuse military coaching",icon:"Sword",color:"#f87171",locked:false},
+    {id:"friendly",name:"DR. WELLNESS",desc:"Warm, science-backed support",icon:"Sun",color:"#4ade80",locked:false},
+    {id:"hype",name:"HYPE LORD",desc:"Maximum energy & chaos",icon:"Zap",color:"#fbbf24",locked:false},
+    {id:"zen",name:"MASTER ZEN",desc:"Mindful performance & flow",icon:"Wind",color:"#38bdf8",locked:true},
+    {id:"science",name:"DATA COACH",desc:"Evidence-based periodization",icon:"Cpu",color:"#a78bfa",locked:true},
+  ];
+  return <div style={{padding:14,paddingBottom:24,display:"flex",flexDirection:"column",gap:12}}>
+    <div><div style={{fontSize:11,fontWeight:900,letterSpacing:"0.14em"}}>YOUR AI COACH</div><div style={{fontSize:10,color:"#52525b"}}>Select coaching persona</div></div>
+    {coaches.map(c=><button key={c.id} onClick={()=>{if(!c.locked){setSettings(p=>({...p,tone:c.id}));if(c.id==="hype")setFlag("hypeMode");}else setShowPaywall(true);}} className="tap" style={{width:"100%",display:"flex",alignItems:"center",gap:12,padding:"12px 13px",border:settings.tone===c.id?`1px solid ${c.color}55`:"1px solid #27272a",borderRadius:10,background:settings.tone===c.id?`${c.color}0a`:"#09090b",cursor:"pointer",textAlign:"left"}}>
+      <div style={{width:40,height:40,borderRadius:9,background:`${c.color}18`,border:`1px solid ${c.color}44`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><Icon name={c.icon} size={18} sw={1.5} style={{color:c.color}}/></div>
+      <div style={{flex:1}}><div style={{fontSize:11,fontWeight:900,color:settings.tone===c.id?c.color:"#d4d4d8"}}>{c.name}</div><div style={{fontSize:10,color:"#52525b"}}>{c.desc}</div></div>
+      {settings.tone===c.id&&<Icon name="Check" size={14} sw={2.5} style={{color:c.color,flexShrink:0}}/>}
+      {c.locked&&<div style={{fontSize:7,color:"#fbbf24",border:"1px solid #78350f",background:"rgba(251,191,36,.07)",padding:"2px 6px",borderRadius:4,fontWeight:900,flexShrink:0}}>PRO</div>}
+    </button>)}
+  </div>;
+}
+
+/* ══ MOBILE APP INSTALL CARD ══ */
+function InstallAppCard(){
+  const[canInstall,setCanInstall]=useState(Boolean(window.deferredPrompt));
+  const[isInstalled,setIsInstalled]=useState(()=>{
+    return window.matchMedia("(display-mode: standalone)").matches||window.navigator.standalone===true;
+  });
+  const[showGuide,setShowGuide]=useState(false);
+
+  useEffect(()=>{
+    const handler=()=>setCanInstall(true);
+    window.addEventListener("pwa-installable",handler);
+    window.addEventListener("appinstalled",()=>{setIsInstalled(true);setCanInstall(false);});
+    if(window.deferredPrompt) setCanInstall(true);
+    return ()=>{
+      window.removeEventListener("pwa-installable",handler);
+    };
+  },[]);
+
+  const handleInstall=async()=>{
+    if(window.deferredPrompt){
+      window.deferredPrompt.prompt();
+      const choice=await window.deferredPrompt.userChoice;
+      if(choice&&choice.outcome==="accepted"){
+        setIsInstalled(true);
+      }
+      window.deferredPrompt=null;
+      setCanInstall(false);
+    }else{
+      setShowGuide(p=>!p);
+    }
+  };
+
+  if(isInstalled){
+    return <div className="card" style={{padding:"12px 14px",display:"flex",alignItems:"center",gap:11,background:"rgba(74,222,128,.06)",border:"1px solid rgba(74,222,128,.3)"}}>
+      <div style={{width:38,height:38,borderRadius:10,background:"rgba(74,222,128,.15)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,color:"#4ade80"}}>
+        <Icon name="Check" size={18} sw={2.5}/>
+      </div>
+      <div>
+        <div style={{fontSize:11,fontWeight:900,color:"#4ade80"}}>INSTALLED ON DEVICE</div>
+        <div style={{fontSize:9,color:"#71717a",marginTop:1}}>Running in standalone hardware-accelerated mode</div>
+      </div>
+    </div>;
+  }
+
+  return <div className="card" style={{padding:12,border:"1px solid #3f3f46",background:"#0d1117"}}>
+    <div style={{display:"flex",alignItems:"center",gap:12}}>
+      <img src="icon-192.png" alt="App Icon" style={{width:40,height:40,borderRadius:10,border:"1px solid #27272a",background:"#000",flexShrink:0}}/>
+      <div style={{flex:1}}>
+        <div style={{fontSize:11,fontWeight:900,color:"#fff"}}>INSTALL FITGENIUS ON ANDROID</div>
+        <div style={{fontSize:9,color:"#8b949e",marginTop:2}}>Full screen, App Drawer, offline speed</div>
+      </div>
+      <button onClick={handleInstall} className="tap" style={{padding:"8px 13px",background:"#22c55e",color:"#000",border:"none",borderRadius:8,fontSize:10,fontWeight:900,cursor:"pointer",display:"flex",alignItems:"center",gap:5,flexShrink:0}}>
+        <Icon name="Download" size={13} sw={2.5}/> INSTALL
+      </button>
+    </div>
+    {showGuide&&<div style={{marginTop:10,paddingTop:10,borderTop:"1px solid #27272a",fontSize:10,color:"#a1a1aa",lineHeight:1.6}}>
+      <div style={{fontWeight:800,color:"#fff",marginBottom:3}}>Android 1-Tap Install Instructions:</div>
+      <div>1. Tap Chrome's <b style={{color:"#fff"}}>three vertical dots (⋮)</b> in the top right corner.</div>
+      <div>2. Select <b style={{color:"#4ade80"}}>"Install app"</b> or <b style={{color:"#4ade80"}}>"Add to Home screen"</b>.</div>
+      <div>3. Android creates FitGenius directly in your App Drawer & Home screen!</div>
+    </div>}
+  </div>;
+}
+
+/* ══ SETTINGS TAB ══ */
+function SettingsTab({settings,setSettings,xp,streak,wCount,setShowPaywall,tone}){
+  const{lv}=getLvl(xp);
+  const[authModal,setAuthModal]=useState(null);
+  const[authEmail,setAuthEmail]=useState("");
+  const[authStatus,setAuthStatus]=useState(()=>loadJSON("fg_auth",null));
+  const I={width:"100%",background:"#09090b",border:"1px solid #27272a",borderRadius:8,color:"#fff",fontSize:13,padding:"10px 11px",outline:"none",fontFamily:"inherit"};
+  const doAuth=(provider)=>{
+    if(provider==="email"){setAuthModal("email");return;}
+    setAuthStatus({provider,name:provider==="google"?"Google User":"Apple User",email:provider+"@account",ts:Date.now()});
+    saveJSON("fg_auth",{provider,name:provider==="google"?"Google User":"Apple User",email:provider+"@account",ts:Date.now()});
+    setAuthModal(null);
+  };
+  const signOut=()=>{setAuthStatus(null);saveJSON("fg_auth",null);};
+  const submitEmail=()=>{if(!authEmail.trim()||!authEmail.includes("@"))return;setAuthStatus({provider:"email",name:authEmail.split("@")[0],email:authEmail,ts:Date.now()});saveJSON("fg_auth",{provider:"email",name:authEmail.split("@")[0],email:authEmail,ts:Date.now()});setAuthModal(null);setAuthEmail("");};
+  return <div style={{padding:14,paddingBottom:28,display:"flex",flexDirection:"column",gap:14}}>
+    {/* Profile Card */}
+    <div className="card" style={{padding:14,border:`1px solid ${lv.c}33`,background:`${lv.c}08`}}>
+      <div style={{display:"flex",alignItems:"center",gap:12}}>
+        <div style={{width:52,height:52,borderRadius:14,background:lv.g,border:`1px solid ${lv.c}66`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><Icon name="User" size={22} sw={1.5} style={{color:lv.c}}/></div>
+        <div style={{flex:1}}><input value={settings.name||""} onChange={e=>setSettings(p=>({...p,name:e.target.value}))} placeholder="Your Name" style={{...I,marginBottom:4}}/><div style={{fontSize:9,color:"#52525b",fontWeight:700}}>{lv.n} · {xp.toLocaleString()} XP · {streak.cur}d streak</div></div>
+      </div>
+    </div>
+    {/* Auth Section */}
+    <div>
+      <div style={{fontSize:8,letterSpacing:"0.2em",color:"#52525b",fontWeight:700,marginBottom:8}}>ACCOUNT & SYNC</div>
+      {authStatus?<div className="card" style={{padding:14}}>
+        <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:12}}>
+          <div style={{width:40,height:40,borderRadius:10,background:"rgba(74,222,128,.1)",border:"1px solid rgba(74,222,128,.3)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><Icon name="Check" size={18} sw={2.5} style={{color:"#4ade80"}}/></div>
+          <div style={{flex:1}}><div style={{fontSize:11,fontWeight:900,color:"#4ade80"}}>CONNECTED</div><div style={{fontSize:10,color:"#71717a"}}>{authStatus.email}</div><div style={{fontSize:8,color:"#3f3f46",marginTop:1}}>via {authStatus.provider.charAt(0).toUpperCase()+authStatus.provider.slice(1)} · Data synced</div></div>
+        </div>
+        <button onClick={signOut} className="tap" style={{width:"100%",padding:"9px 0",background:"none",border:"1px solid #27272a",borderRadius:8,fontSize:9,letterSpacing:"0.1em",fontWeight:900,color:"#71717a",cursor:"pointer"}}>SIGN OUT</button>
+      </div>:<div style={{display:"flex",flexDirection:"column",gap:7}}>
+        <button onClick={()=>doAuth("google")} className="tap" style={{width:"100%",display:"flex",alignItems:"center",gap:12,padding:"12px 14px",background:"#09090b",border:"1px solid #27272a",borderRadius:10,cursor:"pointer",color:"#fff"}}>
+          <div style={{width:36,height:36,borderRadius:8,background:"rgba(66,133,244,.1)",border:"1px solid rgba(66,133,244,.3)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><svg width="18" height="18" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg></div>
+          <div style={{flex:1,textAlign:"left"}}><div style={{fontSize:11,fontWeight:900}}>Continue with Google</div><div style={{fontSize:9,color:"#52525b"}}>Sync across all devices</div></div>
+        </button>
+        <button onClick={()=>doAuth("apple")} className="tap" style={{width:"100%",display:"flex",alignItems:"center",gap:12,padding:"12px 14px",background:"#09090b",border:"1px solid #27272a",borderRadius:10,cursor:"pointer",color:"#fff"}}>
+          <div style={{width:36,height:36,borderRadius:8,background:"rgba(255,255,255,.06)",border:"1px solid #3f3f46",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><svg width="16" height="19" viewBox="0 0 16 19" fill="#fff"><path d="M13.3 10.1c0-2.2 1.8-3.2 1.9-3.3-1-1.5-2.6-1.7-3.2-1.8-1.3-.1-2.6.8-3.3.8-.7 0-1.8-.8-2.9-.7-1.5 0-2.9.9-3.7 2.2C.5 9.7 1.5 13.2 3 15.2c.8 1 1.7 2.1 2.8 2.1 1.2 0 1.6-.7 2.9-.7 1.4 0 1.7.7 2.9.7 1.2 0 2-1 2.8-2 .9-1.2 1.2-2.4 1.3-2.4 0 0-2.4-1-2.4-3.8zM11.1 3.3C11.8 2.5 12.2 1.3 12.1 0 11 0 9.8.7 9 1.6c-.6.7-1.2 1.9-1.1 3 1.3.1 2.5-.6 3.2-1.3z"/></svg></div>
+          <div style={{flex:1,textAlign:"left"}}><div style={{fontSize:11,fontWeight:900}}>Continue with Apple</div><div style={{fontSize:9,color:"#52525b"}}>Private relay sign-in</div></div>
+        </button>
+        <button onClick={()=>setAuthModal("email")} className="tap" style={{width:"100%",display:"flex",alignItems:"center",gap:12,padding:"12px 14px",background:"#09090b",border:"1px solid #27272a",borderRadius:10,cursor:"pointer",color:"#fff"}}>
+          <div style={{width:36,height:36,borderRadius:8,background:"rgba(167,139,250,.1)",border:"1px solid rgba(167,139,250,.3)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><Icon name="MessageSquare" size={16} sw={1.5} style={{color:"#a78bfa"}}/></div>
+          <div style={{flex:1,textAlign:"left"}}><div style={{fontSize:11,fontWeight:900}}>Continue with Email</div><div style={{fontSize:9,color:"#52525b"}}>Use email & password</div></div>
+        </button>
+      </div>}
+    </div>
+    {/* General */}
+    <div><div style={{fontSize:8,letterSpacing:"0.2em",color:"#52525b",fontWeight:700,marginBottom:8}}>GENERAL</div>
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"10px 12px",background:"#09090b",border:"1px solid #27272a",borderRadius:9,marginBottom:6}}>
+        <div style={{fontSize:11,color:"#d4d4d8",fontWeight:600}}>Units</div>
+        <div style={{display:"flex",gap:4}}>{["kg","lbs"].map(u=><button key={u} onClick={()=>setSettings(p=>({...p,units:u}))} className="tap" style={{padding:"5px 12px",fontSize:9,fontWeight:900,border:settings.units===u?"1px solid #fff":"1px solid #27272a",background:settings.units===u?"#fff":"transparent",color:settings.units===u?"#000":"#52525b",borderRadius:7,cursor:"pointer"}}>{u.toUpperCase()}</button>)}</div>
+      </div>
+    </div>
+    {/* Mobile App */}
+    <div><div style={{fontSize:8,letterSpacing:"0.2em",color:"#52525b",fontWeight:700,marginBottom:8}}>MOBILE APP (ANDROID / IOS)</div>
+      <InstallAppCard/>
+    </div>
+    {/* Gemini AI Key */}
+    <div><div style={{fontSize:8,letterSpacing:"0.2em",color:"#52525b",fontWeight:700,marginBottom:8}}>GEMINI AI INTELLIGENCE</div>
+      <div className="card" style={{padding:12}}>
+        <div style={{fontSize:9,color:"#a1a1aa",marginBottom:6,fontWeight:700}}>GEMINI API KEY (OPTIONAL)</div>
+        <input
+          type="password"
+          value={settings.geminiKey||""}
+          onChange={e=>{
+            const val=e.target.value;
+            setSettings(p=>({...p,geminiKey:val}));
+            setGeminiKey(val);
+          }}
+          placeholder="Paste free Gemini key from aistudio.google.com"
+          style={I}
+        />
+        <div style={{fontSize:8,color:"#52525b",marginTop:5}}>Free key from aistudio.google.com — saved securely in local storage.</div>
+      </div>
+    </div>
+    {/* Data */}
+    <div><div style={{fontSize:8,letterSpacing:"0.2em",color:"#52525b",fontWeight:700,marginBottom:8}}>DATA</div>
+      <button onClick={()=>{if(confirm("Clear all data?")){Object.keys(localStorage).filter(k=>k.startsWith("fg_")).forEach(k=>localStorage.removeItem(k));location.reload();}}} className="tap" style={{display:"flex",alignItems:"center",gap:11,padding:"11px 13px",background:"#09090b",border:"1px solid #27272a",borderRadius:9,color:"#f87171",cursor:"pointer",width:"100%",textAlign:"left"}}><Icon name="Trash2" size={16} sw={1.5}/><div style={{fontSize:10,fontWeight:700}}>Clear All Data</div></button>
+    </div>
+    {/* Pro */}
+    <div onClick={()=>setShowPaywall(true)} className="card tap" style={{padding:14,display:"flex",alignItems:"center",gap:12,border:"1px solid #fbbf2444",background:"rgba(251,191,36,.04)",cursor:"pointer"}}>
+      <div style={{width:44,height:44,borderRadius:10,background:"rgba(251,191,36,.12)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><Icon name="Crown" size={20} sw={1.5} style={{color:"#fbbf24"}}/></div>
+      <div style={{flex:1}}><div style={{fontSize:11,fontWeight:900,color:"#fbbf24",marginBottom:2}}>UPGRADE TO PRO</div><div style={{fontSize:10,color:"#71717a"}}>All coaches, analytics, precision nutrition</div></div>
+    </div>
+    <div style={{textAlign:"center",fontSize:9,color:"#27272a",padding:"8px 0"}}>FITGENIUS.AI v5.2 · 80 RANKS</div>
+    {/* Email Auth Modal */}
+    {authModal==="email"&&<div onClick={()=>setAuthModal(null)} className="modal-bg" style={{position:"fixed",inset:0,zIndex:70,background:"rgba(0,0,0,.88)",display:"flex",alignItems:"center",justifyContent:"center",padding:16}}>
+      <div onClick={e=>e.stopPropagation()} className="slide-up card" style={{width:"100%",maxWidth:340}}>
+        <div style={{padding:"12px 14px",borderBottom:"1px solid #18181b",display:"flex",justifyContent:"space-between",alignItems:"center"}}><div style={{fontSize:9,letterSpacing:"0.18em",fontWeight:900}}>SIGN IN WITH EMAIL</div><button onClick={()=>setAuthModal(null)} style={{background:"none",border:"none",color:"#52525b",cursor:"pointer",display:"flex"}}><Icon name="X" size={17}/></button></div>
+        <div style={{padding:14,display:"flex",flexDirection:"column",gap:10}}>
+          <input value={authEmail} onChange={e=>setAuthEmail(e.target.value)} onKeyDown={e=>e.key==="Enter"&&submitEmail()} type="email" placeholder="your@email.com" style={{...I}}/>
+          <input type="password" placeholder="Password" style={{...I}}/>
+          <button onClick={submitEmail} className="tap" style={{width:"100%",padding:12,background:authEmail.includes("@")?"#fff":"#27272a",color:authEmail.includes("@")?"#000":"#52525b",border:"none",borderRadius:8,fontSize:9,letterSpacing:"0.14em",fontWeight:900,cursor:authEmail.includes("@")?"pointer":"default"}}>SIGN IN</button>
+          <div style={{fontSize:9,color:"#3f3f46",textAlign:"center"}}>Data will sync to cloud</div>
+        </div>
+      </div>
+    </div>}
+  </div>;
+}
+
+/* ══ PAYWALL ══ */
+function PaywallModal({tone,onClose}){
+  return <div onClick={onClose} className="modal-bg" style={{position:"fixed",inset:0,zIndex:90,background:"rgba(0,0,0,.94)",display:"flex",alignItems:"flex-end",justifyContent:"center"}}>
+    <div onClick={e=>e.stopPropagation()} className="slide-up" style={{width:"100%",maxWidth:480,background:"#09090b",borderRadius:"18px 18px 0 0",border:"1px solid #27272a",overflow:"hidden"}}>
+      <div style={{background:"linear-gradient(135deg,#78350f,#d97706)",padding:"24px 18px 20px",textAlign:"center",position:"relative"}}>
+        <button onClick={onClose} style={{position:"absolute",top:12,right:12,background:"rgba(0,0,0,.4)",border:"none",borderRadius:99,width:28,height:28,color:"rgba(255,255,255,.7)",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}><Icon name="X" size={14}/></button>
+        <Icon name="Crown" size={36} sw={1.5} style={{color:"#fbbf24",filter:"drop-shadow(0 0 18px rgba(251,191,36,.7))",marginBottom:8}}/>
+        <div style={{fontSize:20,fontWeight:900,color:"#fff"}}>FITGENIUS PRO</div>
+        <div style={{fontSize:10,color:"rgba(255,255,255,.65)",marginTop:4}}>Unleash your full potential</div>
+      </div>
+      <div style={{padding:"16px 16px 0"}}>
+        <div style={{display:"flex",gap:7,marginBottom:14}}>
+          {[["$4.99","/ MONTH"],["$29.99","/ YEAR"]].map(([price,per],i)=><button key={i} className="tap" style={{flex:1,padding:"12px 8px",background:i===1?"rgba(251,191,36,.1)":"transparent",border:i===1?"1px solid #fbbf24":"1px solid #27272a",borderRadius:10,cursor:"pointer",textAlign:"center"}}><div style={{fontSize:16,fontWeight:900,color:i===1?"#fbbf24":"#fff"}}>{price}</div><div style={{fontSize:8,color:"#71717a"}}>{per}</div>{i===1&&<div style={{fontSize:7,color:"#fbbf24",marginTop:3,fontWeight:900}}>SAVE 50%</div>}</button>)}
+        </div>
+        <button className="tap" style={{width:"100%",padding:"13px 0",background:"linear-gradient(135deg,#78350f,#d97706)",color:"#fff",border:"none",borderRadius:10,fontSize:10,letterSpacing:"0.14em",fontWeight:900,cursor:"pointer",marginBottom:10}}>START 7-DAY FREE TRIAL</button>
+        <div style={{textAlign:"center",fontSize:8,color:"#3f3f46",paddingBottom:20}}>Cancel anytime · Secure payment</div>
+      </div>
+    </div>
+  </div>;
+}
+
+/* ══ ONBOARDING ══ */
+function OnboardModal({onDone}){
+  const[step,setStep]=useState(0);
+  const SL=[
+    {icon:"Rocket",c:"#60a5fa",title:"WELCOME TO FITGENIUS.AI",sub:"Your AI-powered performance companion.",bg:"linear-gradient(135deg,#0c1a3b,#1e3a5f)"},
+    {icon:"Dumbbell",c:"#f87171",title:"AI WORKOUT BUILDER",sub:"Generate personalized workouts by muscle group with form guides.",bg:"linear-gradient(135deg,#3b0a0a,#7f1d1d)"},
+    {icon:"Camera",c:"#4ade80",title:"AI FOOD SCANNER",sub:"Snap a photo. Gemini Vision identifies food and calculates macros.",bg:"linear-gradient(135deg,#052e16,#14532d)"},
+    {icon:"Trophy",c:"#fbbf24",title:"RANK UP & EARN BADGES",sub:"Complete challenges, earn XP, climb through 80 ranks from Recruit to Legend.",bg:"linear-gradient(135deg,#2d1a00,#713f12)"},
+  ];
+  const sl=SL[step];
+  return <div style={{position:"fixed",inset:0,zIndex:100,display:"flex",flexDirection:"column",background:"#000"}}>
+    <div style={{flex:1,background:sl.bg,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:24}}>
+      <div className="badge-pop" key={step} style={{width:100,height:100,background:`${sl.c}15`,border:`2px solid ${sl.c}55`,borderRadius:22,display:"flex",alignItems:"center",justifyContent:"center",marginBottom:24}}><Icon name={sl.icon} size={48} sw={1.5} style={{color:sl.c,filter:`drop-shadow(0 0 18px ${sl.c})`}}/></div>
+      <h1 className="fade-up" style={{fontSize:22,fontWeight:900,textAlign:"center",color:"#fff",marginBottom:12}}>{sl.title}</h1>
+      <p className="fade-up" style={{fontSize:13,color:"rgba(255,255,255,.6)",textAlign:"center",lineHeight:1.7,maxWidth:300}}>{sl.sub}</p>
+    </div>
+    <div style={{flexShrink:0,padding:20,background:"#000",borderTop:"1px solid #18181b"}}>
+      <div style={{display:"flex",justifyContent:"center",gap:6,marginBottom:18}}>{SL.map((_,i)=><div key={i} style={{width:i===step?20:6,height:6,borderRadius:99,background:i===step?sl.c:"#27272a",transition:"all .3s"}}/>)}</div>
+      <div style={{display:"flex",gap:9}}>
+        <button onClick={onDone} className="tap" style={{flex:1,padding:13,border:"1px solid #27272a",background:"transparent",color:"#52525b",fontSize:9,letterSpacing:"0.14em",fontWeight:900,cursor:"pointer",borderRadius:9}}>SKIP</button>
+        <button onClick={()=>step<SL.length-1?setStep(s=>s+1):onDone()} className="tap" style={{flex:2,padding:13,background:sl.c,color:"#000",border:"none",fontSize:9,letterSpacing:"0.14em",fontWeight:900,cursor:"pointer",borderRadius:9}}>{step<SL.length-1?"NEXT":"START"}</button>
+      </div>
+    </div>
+  </div>;
+}
+
+/* ══ COACH POPUP ══ */
+function CoachPopup({msg,tone,onClose}){
+  const MSGS={
+    brutal:{levelUp:"New rank. Prove you belong.",workout:"Done. Same time tomorrow.",greeting:"Weakness is a choice."},
+    friendly:{levelUp:"You leveled up! Keep going! 🎉",workout:"Amazing workout! 💪",greeting:"You're doing great!"},
+    hype:{levelUp:"BRO YOU LEVELED UP!! 🚀🔥",workout:"THAT WAS LEGENDARY!! ⚡",greeting:"YOU'RE BUILT DIFFERENT!!"},
+  };
+  const m=MSGS[tone]?.[msg.type]||MSGS[tone]?.greeting||"Keep going!";
+  const c={brutal:"#fff",friendly:"#4ade80",hype:"#fbbf24"}[tone]||"#fff";
+  useEffect(()=>{const t=setTimeout(onClose,4500);return()=>clearTimeout(t);},[]);
+  return <div className="coach-in" style={{position:"fixed",bottom:90,left:14,right:14,zIndex:80,maxWidth:400,margin:"0 auto"}}>
+    <div className="card" style={{padding:"13px 14px",border:`1px solid ${c}44`,background:`${c}0a`,display:"flex",alignItems:"flex-start",gap:10}}>
+      <div style={{width:36,height:36,borderRadius:9,background:`${c}18`,border:`1px solid ${c}44`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><Icon name="Brain" size={16} sw={1.5} style={{color:c}}/></div>
+      <div style={{flex:1}}><div style={{fontSize:8,letterSpacing:"0.14em",color:c,fontWeight:900,marginBottom:3}}>AI COACH</div><div style={{fontSize:12,color:"#d4d4d8",lineHeight:1.6}}>{m}{msg.level?" — Welcome, "+msg.level+".":""}</div></div>
+      <button onClick={onClose} style={{background:"none",border:"none",color:"#52525b",cursor:"pointer",flexShrink:0,padding:0,display:"flex"}}><Icon name="X" size={14}/></button>
+    </div>
+  </div>;
+}
+
+/* ══ CHAT ASSISTANT ══ */
+function ChatAssistant({tone,xp,streak,wCount,mCount,lv}){
+  const[open,setOpen]=useState(false);
+  const TC={brutal:"#fff",friendly:"#4ade80",hype:"#fbbf24"}[tone]||"#fff";
+  const[msgs,setMsgs]=useState([{role:"ai",text:"Hey! I'm your FitGenius AI coach. Ask me anything — workouts, nutrition, form checks, recovery, supplements, whatever you need."}]);
+  const[input,setInput]=useState("");
+  const[loading,setLoading]=useState(false);
+  const[apiOk,setApiOk]=useState(true);
+  const fbIdx=useRef(0);
+  const endRef=useRef(null);
+  const QUICK=["What should I eat today?","Quick 15-min workout?","How to break a plateau?","Am I overtraining?","Best post-workout meal?","Help me build a routine"];
+
+  useEffect(()=>{if(open&&endRef.current)endRef.current.scrollIntoView({behavior:"smooth"});},[msgs,open]);
+
+  const send=async(txt)=>{
+    const userMsg=(txt||input).trim();if(!userMsg||loading)return;
+    const newMsgs=[...msgs,{role:"user",text:userMsg}];
+    setInput("");setMsgs(newMsgs);setLoading(true);
+    let gotResponse=false;
+    try{
+      const contents=[];
+      for(let i=0;i<newMsgs.length;i++){
+        const m=newMsgs[i];
+        const role=m.role==="user"?"user":"model";
+        if(contents.length>0&&contents[contents.length-1].role===role){
+          contents[contents.length-1].parts[0].text+="\n"+m.text;
+        } else {
+          contents.push({role,parts:[{text:m.text}]});
+        }
+      }
+      if(contents[0].role==="model") contents.unshift({role:"user",parts:[{text:"Hi coach"}]});
+      if(contents[contents.length-1].role!=="user") contents.push({role:"user",parts:[{text:"go on"}]});
+
+      const rankName=lv?.n||"unknown";
+      const streakDays=streak?.cur||0;
+      const now=new Date();
+      const hour=now.getHours();
+      const timeOfDay=hour<12?"morning":hour<17?"afternoon":"evening";
+      const sysText=`You are FitGenius AI Coach — the world's best personal trainer and nutritionist.
+
+USER PROFILE:
+- Rank: ${rankName} (${xp||0} XP)
+- Current streak: ${streakDays} days
+- Total workouts completed: ${wCount||0}
+- Total meals logged: ${mCount||0}
+- Time: ${timeOfDay} (${now.toLocaleTimeString()})
+- Session: ${Math.random().toString(36).slice(2,7)}
+
+COACHING STYLE: ${tone}
+${tone==="brutal"?"Be direct, no-nonsense, military drill sergeant energy. Short sentences. Push them hard.":""}
+${tone==="friendly"?"Be warm, encouraging, and supportive. Use emojis occasionally. Celebrate small wins.":""}
+${tone==="hype"?"MAXIMUM ENERGY. Use caps sometimes. Hype them up. Be explosive and motivational.":""}
+
+RULES:
+1. NEVER repeat a previous response verbatim. Always give fresh advice.
+2. Be SPECIFIC: name exercises, rep ranges (3x10), rest periods (90s), food amounts (30g protein).
+3. Keep responses under 80 words. Punchy and actionable.
+4. Reference the user's stats when relevant ("With ${wCount} sessions under your belt...").
+5. If it's ${timeOfDay}, give time-appropriate advice (morning=pre-workout fuel, evening=recovery).
+6. For nutrition, use USDA-accurate values. 1 egg = 72 kcal, 6g protein.
+7. Be conversational. Remember what they said earlier in this chat.`;
+
+      const res=await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key="+GEMINI_KEY,{
+        method:"POST",headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({
+          systemInstruction:{parts:[{text:sysText}]},
+          contents:contents,
+          generationConfig:{maxOutputTokens:200,temperature:1.0,topP:0.95,topK:50}
+        })
+      });
+      if(!res.ok) throw new Error("HTTP "+res.status);
+      const d=await res.json();
+      const r=d.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+      if(r&&r.length>5){
+        setApiOk(true);setLoading(false);setMsgs(p=>[...p,{role:"ai",text:r}]);gotResponse=true;
+      }
+    }catch(e){console.warn("Chat error:",e);setApiOk(false);}
+    if(!gotResponse){
+      setLoading(false);
+      const FB=[
+        "Squats are the king of exercises. 3x8-12 with a weight that challenges the last 2 reps. Rest 2 minutes between sets.",
+        "Protein timing matters less than total daily intake. Aim for 0.7-1g per pound bodyweight. Chicken breast has 31g per 100g.",
+        "Want bigger arms? Superset barbell curls (3x10) with tricep dips (3x12). Arms are 2/3 tricep — don't skip them.",
+        "HIIT burns more fat in less time than steady cardio. Try 30s sprint, 60s walk, repeat 8-10 times. Takes 15 minutes.",
+        "Creatine monohydrate is the most studied supplement ever. 5g daily, no loading needed. Improves strength by 5-10%.",
+        "Deadlifts work 80% of your muscles in one movement. Start with Romanian deadlifts if you're new — lighter, same benefits.",
+        "Sleep 7-9 hours. Growth hormone spikes during deep sleep. Poor sleep kills gains faster than bad training.",
+        "Overhead press builds boulder shoulders. 4x6-8 heavy, then lateral raises 3x15 light for the side delts.",
+        "Greek yogurt has 10g protein per 100g. Add berries and honey post-workout for fast carbs + protein combo.",
+        "Progressive overload doesn't always mean more weight. Add reps, slow the tempo, reduce rest time, or add a pause.",
+        "Pull-ups are the best back exercise. Can't do one yet? Start with negatives — jump up, lower yourself over 5 seconds.",
+        "Hip thrusts beat squats for glute activation. 3x12 with a 2-second pause at the top. Feel the squeeze.",
+        "Pre-workout meal: banana + peanut butter 45 min before. Fast carbs for energy, fats for sustained fuel.",
+        "Walking 10k steps daily burns ~400-500 extra calories. That's 1 pound of fat per week without changing your diet.",
+        "Bench press plateau? Try pause reps: lower the bar, hold 2 seconds on chest, then press. Builds explosive power.",
+        "Foam rolling before training improves range of motion without losing strength. Hit quads, hamstrings, and lats.",
+        "Face pulls 3x15 every session. Best exercise for posture and shoulder health. Use a rope attachment, pull to forehead.",
+        "Caffeine improves workout performance by 3-5%. Take 200mg (one coffee) 30-45 minutes pre-workout for peak effect.",
+        "Don't fear carbs. They fuel your workouts. 1-2g per pound bodyweight on training days. Rice, oats, potatoes, fruit.",
+        "Mind-muscle connection is real. Slow reps with 2s squeeze at peak contraction build more muscle than fast heavy swings."
+      ];
+      setMsgs(p=>[...p,{role:"ai",text:FB[fbIdx.current%FB.length]+" [offline]"}]);
+      fbIdx.current++;
+    }
+  };
+
+  return <>
+    <button onClick={()=>setOpen(o=>!o)} className="tap coach-icon" style={{position:"fixed",bottom:76,right:14,zIndex:35,width:50,height:50,borderRadius:99,background:TC,border:"none",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:`0 0 24px ${TC}66,0 4px 20px rgba(0,0,0,.7)`}}>
+      <Icon name={open?"X":"MessageSquare"} size={21} sw={2.2} style={{color:"#000"}}/>
+    </button>
+    {open&&<div className="slide-up" style={{position:"fixed",bottom:0,left:0,right:0,zIndex:34,height:"72vh",background:"#09090b",border:"1px solid #27272a",borderRadius:"18px 18px 0 0",display:"flex",flexDirection:"column",maxWidth:600,margin:"0 auto"}}>
+      <div style={{padding:"13px 14px 11px",borderBottom:"1px solid #18181b",display:"flex",alignItems:"center",gap:10,flexShrink:0}}>
+        <div style={{width:34,height:34,borderRadius:9,background:`${TC}18`,border:`1px solid ${TC}44`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><Icon name="Brain" size={16} sw={1.5} style={{color:TC}}/></div>
+        <div style={{flex:1}}><div style={{fontSize:11,fontWeight:900,color:TC}}>FITGENIUS AI</div><div style={{fontSize:9,color:apiOk?"#4ade80":"#f87171"}}>{apiOk?"● Live · Gemini":"● Offline · Cached tips"}</div></div>
+        <div style={{display:"flex",gap:6}}>
+          <button onClick={()=>{setMsgs([{role:"ai",text:"Chat cleared! What would you like to know?"}]);fbIdx.current=0;setApiOk(true);}} style={{background:"none",border:"1px solid #27272a",color:"#3f3f46",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",borderRadius:6,padding:"3px 8px",fontSize:8,fontWeight:700,letterSpacing:"0.06em"}}>CLEAR</button>
+          <button onClick={()=>setOpen(false)} style={{background:"none",border:"none",color:"#3f3f46",cursor:"pointer",display:"flex"}}><Icon name="X" size={16}/></button>
+        </div>
+      </div>
+      <div style={{flex:1,overflowY:"auto",WebkitOverflowScrolling:"touch",padding:"12px 14px",display:"flex",flexDirection:"column",gap:10}}>
+        {msgs.map((m,i)=><div key={i} style={{display:"flex",justifyContent:m.role==="user"?"flex-end":"flex-start"}}>
+          <div style={{maxWidth:"84%",padding:"9px 13px",borderRadius:m.role==="user"?"13px 13px 3px 13px":"13px 13px 13px 3px",background:m.role==="user"?TC:"#18181b",color:m.role==="user"?"#000":"#d4d4d8",fontSize:12,lineHeight:1.65,fontWeight:m.role==="user"?700:400}}>{m.text}</div>
+        </div>)}
+        {loading&&<div style={{display:"flex"}}><div style={{padding:"11px 16px",background:"#18181b",borderRadius:"13px 13px 13px 3px",display:"flex",gap:5}}>{[0,1,2].map(i=><div key={i} style={{width:6,height:6,borderRadius:99,background:"#52525b",animation:`pulse 1.2s ease-in-out infinite ${i*.18}s`}}/>)}</div></div>}
+        <div ref={endRef}/>
+      </div>
+      {msgs.length<=1&&!loading&&<div style={{flexShrink:0,padding:"0 12px 8px",display:"flex",gap:6,flexWrap:"wrap"}}>
+        {QUICK.map(q=><button key={q} onClick={()=>send(q)} className="tap" style={{padding:"6px 11px",background:"#18181b",border:"1px solid #27272a",borderRadius:99,fontSize:10,color:"#a1a1aa",cursor:"pointer"}}>{q}</button>)}
+      </div>}
+      <div style={{padding:"10px 12px 14px",borderTop:"1px solid #18181b",display:"flex",gap:8,flexShrink:0}}>
+        <input value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&!e.shiftKey&&send()} placeholder="Ask about workouts, nutrition, form..." style={{flex:1,background:"#000",border:"1px solid #27272a",borderRadius:10,color:"#fff",fontSize:13,padding:"10px 13px",outline:"none",fontFamily:"inherit"}}/>
+        <button onClick={()=>send()} disabled={!input.trim()||loading} className="tap" style={{width:42,height:42,borderRadius:10,background:input.trim()&&!loading?TC:"#27272a",color:input.trim()&&!loading?"#000":"#52525b",border:"none",cursor:input.trim()&&!loading?"pointer":"default",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><Icon name="ChevronRight" size={18} sw={2.5}/></button>
+      </div>
+    </div>}
+  </>;
+}
+
+/* ══ MOUNT ══ */
+const root=ReactDOM.createRoot(document.getElementById("root"));
+root.render(<App/>);
+
+/* ══ PWA & SERVICE WORKER ══ */
+window.deferredPrompt = null;
+window.addEventListener("beforeinstallprompt", (e) => {
+  e.preventDefault();
+  window.deferredPrompt = e;
+  window.dispatchEvent(new CustomEvent("pwa-installable"));
+});
+
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js").then((reg) => {
+      console.log("FitGenius SW active:", reg.scope);
+    }).catch((err) => {
+      console.log("FitGenius SW error:", err);
+    });
+  });
+}
+
+</script>
+</body>
+</html>

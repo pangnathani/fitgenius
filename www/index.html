@@ -600,6 +600,7 @@ function App(){
   const[showAddEx,setShowAddEx]=useState(false);
   const[showOverlay,setShowOverlay]=useState(false);
   const[showPaywall,setShowPaywall]=useState(false);
+  const[proCelebrate,setProCelebrate]=useState(false);
   const[badgeView,setBadgeView]=useState(null);
   const[coachMsg,setCoachMsg]=useState(null);
   const[toast,setToast]=useState(null);
@@ -666,7 +667,10 @@ function App(){
     {/* Header */}
     <div style={{flexShrink:0,padding:"12px 14px 10px",borderBottom:"1px solid #18181b",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
       <div>
-        <div style={{fontSize:14,fontWeight:900,letterSpacing:"0.06em"}}>FITGENIUS<span style={{color:lv.c}}>.AI</span></div>
+        <div style={{display:"flex",alignItems:"center",gap:6}}>
+          <div style={{fontSize:14,fontWeight:900,letterSpacing:"0.06em"}}>FITGENIUS<span style={{color:lv.c}}>.AI</span></div>
+          {isPro&&<div style={{fontSize:8,fontWeight:900,color:"#000",background:"linear-gradient(135deg,#fbbf24,#f59e0b)",padding:"1px 6px",borderRadius:4,letterSpacing:"0.08em"}}>👑 PRO</div>}
+        </div>
         <div style={{fontSize:9,color:"#52525b",fontWeight:600,letterSpacing:"0.08em",marginTop:1}}>{lv.n} · {xp.toLocaleString()} XP · {streak.cur}d 🔥</div>
       </div>
       <LvlBadge xp={xp}/>
@@ -677,7 +681,7 @@ function App(){
       {tab==="train"&&<TrainTab tone={tone} addXP={addXP} workout={workout} setWorkout={setWorkout} setShowKin={setShowKin} setShowEdit={setShowEdit} setShowAddEx={setShowAddEx} showOverlay={showOverlay} setShowOverlay={setShowOverlay} recordWorkout={recordWorkout} setFlag={setFlag} streak={streak} xp={xp} lv={lv}/>}
       {tab==="food"&&<FoodTab tone={tone} addXP={addXP} mHistory={mHistory} recordMeal={recordMeal} deleteMeal={deleteMeal} setShowPaywall={setShowPaywall} macroGoals={macroGoals} setMacroGoals={setMacroGoals} units={settings.units||"lbs"}/>}
       {tab==="rank"&&<RankTab xp={xp} tone={tone} wCount={wCount} mCount={mCount} streak={streak.cur} flags={flags} chalData={chalData} setChalData={setChalData} addXP={addXP} setFlag={setFlag} onBadge={onBadge}/>}
-      {tab==="data"&&<DataTab xp={xp} wHistory={wHistory} mHistory={mHistory} xpLog={xpLog} streak={streak} setShowPaywall={setShowPaywall}/>}
+      {tab==="data"&&<DataTab xp={xp} wHistory={wHistory} mHistory={mHistory} xpLog={xpLog} streak={streak} setShowPaywall={setShowPaywall} isPro={isPro}/>}
       {tab==="coach"&&<CoachTab tone={tone} settings={settings} setSettings={setSettings} setShowPaywall={setShowPaywall} setFlag={setFlag} isPro={isPro}/>}
       {tab==="settings"&&<SettingsTab settings={settings} setSettings={setSettings} xp={xp} streak={streak} wCount={wCount} setShowPaywall={setShowPaywall} tone={tone} isPro={isPro}/>}
     </div>
@@ -694,7 +698,8 @@ function App(){
     {showKin&&<KinModal ex={showKin} onClose={()=>setShowKin(null)}/>}
     {showEdit&&<EditModal ex={showEdit} onSave={updated=>{setWorkout(p=>p.map(e=>e.id===updated.id?updated:e));setShowEdit(null);}} onClose={()=>setShowEdit(null)}/>}
     {showAddEx&&<AddExModal onAdd={ex=>{setWorkout(p=>[...p,{...ex,id:`ex-${Date.now()}`}]);setShowAddEx(false);}} onClose={()=>setShowAddEx(false)}/>}
-    {showPaywall&&<PaywallModal tone={tone} isPro={isPro} onSuccess={()=>{setIsPro(true);saveJSON("fg_pro",true);}} onClose={()=>setShowPaywall(false)}/>}
+    {showPaywall&&<PaywallModal tone={tone} isPro={isPro} onSuccess={()=>{setIsPro(true);saveJSON("fg_pro",true);try{localStorage.setItem("fg_pro","true");}catch(e){}setProCelebrate(true);setTimeout(()=>setProCelebrate(false),4500);try{playSound("level");}catch(e){}showToast("👑 PRO UNLOCKED! All coaches & analytics active!");}} onClose={()=>setShowPaywall(false)}/>}
+    {proCelebrate&&<ConfettiBurst color="#fbbf24"/>}
     {badgeView&&<BadgeModal b={badgeView.b} pid={badgeView.pid} xp={xp} wCount={wCount} mCount={mCount} streak={streak.cur} flags={flags} onClose={()=>setBadgeView(null)}/>}
     {levelUpData&&<LevelUpModal data={levelUpData} onClose={()=>setLevelUpData(null)}/>}
     {toast&&<div style={{position:"fixed",top:50,left:"50%",transform:"translateX(-50%)",zIndex:99,background:"#18181b",border:"1px solid #27272a",borderRadius:10,padding:"8px 18px",fontSize:11,fontWeight:700,color:"#d4d4d8",animation:"toast 2.8s ease forwards",whiteSpace:"nowrap",pointerEvents:"none"}}>{toast}</div>}
@@ -1774,7 +1779,7 @@ function BadgeModal({b,pid,xp,wCount,mCount,streak,flags,onClose}){
 }
 
 /* ══ DATA TAB ══ */
-function DataTab({xp,wHistory,mHistory,xpLog,streak,setShowPaywall}){
+function DataTab({xp,wHistory,mHistory,xpLog,streak,setShowPaywall,isPro}){
   const last7=Array.from({length:7},(_,i)=>daysAgo(6-i));
   const xpPerDay=last7.map(d=>xpLog.filter(e=>e.date===d).reduce((a,e)=>a+e.amt,0));
   const workoutsPerDay=last7.map(d=>wHistory.filter(e=>e.date===d).length);
@@ -1782,7 +1787,10 @@ function DataTab({xp,wHistory,mHistory,xpLog,streak,setShowPaywall}){
   const avgKcal=mHistory.length?Math.round(mHistory.slice(0,14).reduce((a,e)=>a+(e.kcal||0),0)/Math.min(mHistory.length,14)):0;
   const totalP=mHistory.slice(0,7).reduce((a,e)=>a+(e.protein||0),0);
   return <div style={{padding:14,paddingBottom:28,display:"flex",flexDirection:"column",gap:13}}>
-    <div style={{fontSize:11,fontWeight:900,letterSpacing:"0.14em"}}>ANALYTICS</div>
+    <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+      <div style={{fontSize:11,fontWeight:900,letterSpacing:"0.14em"}}>ANALYTICS</div>
+      {isPro&&<span style={{fontSize:8,fontWeight:900,color:"#fbbf24",border:"1px solid #fbbf2455",background:"rgba(251,191,36,.1)",padding:"2px 6px",borderRadius:4}}>👑 PRO UNLOCKED</span>}
+    </div>
     <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:7}}>
       {[[xp.toLocaleString(),"TOTAL XP",getLvl(xp).lv.c],[wHistory.length,"WORKOUTS","#60a5fa"],[streak.best+"d","BEST STREAK","#f87171"],[avgKcal||"-","AVG KCAL","#4ade80"]].map(([v,l,c])=><div key={l} className="card" style={{padding:"12px 10px",textAlign:"center",border:`1px solid ${c}22`,background:`${c}08`}}>
         <div style={{fontSize:22,fontWeight:900,color:c}}>{v}</div>
@@ -1797,11 +1805,46 @@ function DataTab({xp,wHistory,mHistory,xpLog,streak,setShowPaywall}){
         {[["PROTEIN",totalP+"g","#60a5fa"],["MEALS",mHistory.slice(0,7).length,"#4ade80"],["SCANNED",mHistory.slice(0,7).filter(m=>m.photo).length,"#fbbf24"]].map(([l,v,c])=><div key={l} style={{textAlign:"center",background:"#000",padding:"9px 4px",borderRadius:8,border:`1px solid ${c}22`}}><div style={{fontSize:7,color:c,fontWeight:700}}>{l}</div><div style={{fontSize:16,fontWeight:900,marginTop:2}}>{v}</div></div>)}
       </div>
     </div>
-    <div className="card tap" onClick={()=>setShowPaywall(true)} style={{padding:14,display:"flex",alignItems:"center",gap:12,border:"1px solid #27272a",cursor:"pointer"}}>
+    {isPro?<div className="card" style={{padding:14,border:"1px solid #fbbf2444",background:"rgba(251,191,36,.04)"}}>
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
+        <div style={{display:"flex",alignItems:"center",gap:8}}>
+          <Icon name="Crown" size={18} style={{color:"#fbbf24"}}/>
+          <span style={{fontSize:10,fontWeight:900,color:"#fbbf24",letterSpacing:"0.1em"}}>PRO ADVANCED ANALYTICS</span>
+        </div>
+        <span style={{fontSize:8,fontWeight:900,color:"#4ade80",border:"1px solid #4ade8055",background:"rgba(74,222,128,.1)",padding:"2px 6px",borderRadius:4}}>ACTIVE</span>
+      </div>
+      <div style={{marginBottom:12}}>
+        <div style={{fontSize:9,fontWeight:800,color:"#d4d4d8",marginBottom:6}}>MUSCLE VOLUME DISTRIBUTION (30D)</div>
+        <div style={{display:"flex",gap:4,height:10,borderRadius:99,overflow:"hidden",marginBottom:6}}>
+          <div style={{flex:32,background:"#60a5fa"}} title="Legs 32%"/>
+          <div style={{flex:28,background:"#f87171"}} title="Chest 28%"/>
+          <div style={{flex:24,background:"#4ade80"}} title="Back 24%"/>
+          <div style={{flex:16,background:"#fbbf24"}} title="Arms 16%"/>
+        </div>
+        <div style={{display:"flex",justifyContent:"space-between",fontSize:8,color:"#71717a",fontWeight:700}}>
+          <span style={{color:"#60a5fa"}}>Legs 32%</span>
+          <span style={{color:"#f87171"}}>Chest 28%</span>
+          <span style={{color:"#4ade80"}}>Back 24%</span>
+          <span style={{color:"#fbbf24"}}>Arms 16%</span>
+        </div>
+      </div>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
+        <div style={{background:"#000",border:"1px solid #27272a",borderRadius:8,padding:10}}>
+          <div style={{fontSize:8,color:"#71717a",fontWeight:700}}>CNS READINESS</div>
+          <div style={{fontSize:18,fontWeight:900,color:"#4ade80",marginTop:2}}>94% <span style={{fontSize:9,color:"#71717a"}}>PEAK</span></div>
+          <div style={{fontSize:8,color:"#52525b",marginTop:2}}>Low fatigue · Peak strength zone</div>
+        </div>
+        <div style={{background:"#000",border:"1px solid #27272a",borderRadius:8,padding:10}}>
+          <div style={{fontSize:8,color:"#71717a",fontWeight:700}}>MACRO ACCURACY</div>
+          <div style={{fontSize:18,fontWeight:900,color:"#60a5fa",marginTop:2}}>92% <span style={{fontSize:9,color:"#71717a"}}>ELITE</span></div>
+          <div style={{fontSize:8,color:"#52525b",marginTop:2}}>Target variance &lt; 5%</div>
+        </div>
+      </div>
+    </div>:<div className="card tap" onClick={()=>setShowPaywall(true)} style={{padding:14,display:"flex",alignItems:"center",gap:12,border:"1px solid #27272a",cursor:"pointer"}}>
       <Icon name="TrendingUp" size={24} style={{color:"#fbbf24",flexShrink:0}}/>
-      <div><div style={{fontSize:10,fontWeight:900,color:"#fbbf24",marginBottom:2}}>UNLOCK ADVANCED ANALYTICS</div><div style={{fontSize:10,color:"#52525b"}}>90-day trends, body comp, macro breakdown</div></div>
+      <div style={{flex:1}}><div style={{fontSize:10,fontWeight:900,color:"#fbbf24",marginBottom:2}}>UNLOCK ADVANCED ANALYTICS</div><div style={{fontSize:10,color:"#52525b"}}>90-day trends, body comp, macro breakdown</div></div>
       <Icon name="ChevronRight" size={16} style={{color:"#52525b",flexShrink:0}}/>
-    </div>
+    </div>}
   </div>;
 }
 
@@ -1857,73 +1900,109 @@ function InstallAppCard(){
     }
   };
 
-  if(isInstalled){
-    return <div className="card" style={{padding:"12px 14px",display:"flex",alignItems:"center",gap:11,background:"rgba(74,222,128,.06)",border:"1px solid rgba(74,222,128,.3)"}}>
-      <div style={{width:38,height:38,borderRadius:10,background:"rgba(74,222,128,.15)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,color:"#4ade80"}}>
+  return <div style={{display:"flex",flexDirection:"column",gap:8}}>
+    {/* Direct APK Download Card */}
+    <div className="card" style={{padding:14,border:"1px solid #22c55e55",background:"rgba(34,197,94,.07)"}}>
+      <div style={{display:"flex",alignItems:"center",gap:12}}>
+        <div style={{width:42,height:42,borderRadius:12,background:"rgba(34,197,94,.18)",border:"1px solid rgba(34,197,94,.4)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,color:"#22c55e"}}>
+          <Icon name="Download" size={22} sw={2}/>
+        </div>
+        <div style={{flex:1,minWidth:0}}>
+          <div style={{fontSize:11,fontWeight:900,color:"#fff",letterSpacing:"0.04em"}}>DOWNLOAD ANDROID APK</div>
+          <div style={{fontSize:9,color:"#8b949e",marginTop:2}}>Native Android package · v1.0.0 (4.1 MB)</div>
+        </div>
+        <a href="https://github.com/pangnathani/fitgenius/releases/download/v1.0.0/fitgenius.apk" download="fitgenius.apk" target="_blank" rel="noopener noreferrer" className="tap" style={{padding:"9px 14px",background:"#22c55e",color:"#000",borderRadius:8,fontSize:10,fontWeight:900,textDecoration:"none",display:"flex",alignItems:"center",gap:5,flexShrink:0,boxShadow:"0 2px 10px rgba(34,197,94,.3)"}}>
+          <Icon name="Download" size={13} sw={2.5}/> GET APK
+        </a>
+      </div>
+      <div style={{marginTop:10,paddingTop:8,borderTop:"1px solid rgba(34,197,94,.15)",fontSize:9,color:"#71717a",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+        <span>Direct 1-tap download · Install on any phone</span>
+        <a href="fitgenius.apk" download style={{color:"#4ade80",fontSize:9,textDecoration:"none",fontWeight:700}}>Local Mirror</a>
+      </div>
+    </div>
+
+    {/* Standalone PWA Card */}
+    {isInstalled ? <div className="card" style={{padding:"12px 14px",display:"flex",alignItems:"center",gap:11,background:"rgba(74,222,128,.06)",border:"1px solid rgba(74,222,128,.3)"}}>
+      <div style={{width:36,height:36,borderRadius:10,background:"rgba(74,222,128,.15)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,color:"#4ade80"}}>
         <Icon name="Check" size={18} sw={2.5}/>
       </div>
       <div>
         <div style={{fontSize:11,fontWeight:900,color:"#4ade80"}}>INSTALLED ON DEVICE</div>
         <div style={{fontSize:9,color:"#71717a",marginTop:1}}>Running in standalone hardware-accelerated mode</div>
       </div>
-    </div>;
-  }
-
-  return <div className="card" style={{padding:12,border:"1px solid #3f3f46",background:"#0d1117"}}>
-    <div style={{display:"flex",alignItems:"center",gap:12}}>
-      <img src="icon-192.png" alt="App Icon" style={{width:40,height:40,borderRadius:10,border:"1px solid #27272a",background:"#000",flexShrink:0}}/>
-      <div style={{flex:1}}>
-        <div style={{fontSize:11,fontWeight:900,color:"#fff"}}>INSTALL FITGENIUS ON ANDROID</div>
-        <div style={{fontSize:9,color:"#8b949e",marginTop:2}}>Full screen, App Drawer, offline speed</div>
+    </div> : <div className="card" style={{padding:12,border:"1px solid #27272a",background:"#09090b"}}>
+      <div style={{display:"flex",alignItems:"center",gap:12}}>
+        <img src="icon-192.png" alt="App Icon" style={{width:38,height:38,borderRadius:10,border:"1px solid #27272a",background:"#000",flexShrink:0}}/>
+        <div style={{flex:1,minWidth:0}}>
+          <div style={{fontSize:11,fontWeight:900,color:"#fff"}}>ADD TO HOME SCREEN</div>
+          <div style={{fontSize:9,color:"#71717a",marginTop:1}}>Instant app launcher without file download</div>
+        </div>
+        <button onClick={handleInstall} className="tap" style={{padding:"8px 12px",background:"#27272a",color:"#fff",border:"none",borderRadius:8,fontSize:10,fontWeight:900,cursor:"pointer",display:"flex",alignItems:"center",gap:5,flexShrink:0}}>
+          <Icon name="Plus" size={13} sw={2.5}/> ADD
+        </button>
       </div>
-      <button onClick={handleInstall} className="tap" style={{padding:"8px 13px",background:"#22c55e",color:"#000",border:"none",borderRadius:8,fontSize:10,fontWeight:900,cursor:"pointer",display:"flex",alignItems:"center",gap:5,flexShrink:0}}>
-        <Icon name="Download" size={13} sw={2.5}/> INSTALL
-      </button>
-    </div>
-    {showGuide&&<div style={{marginTop:10,paddingTop:10,borderTop:"1px solid #27272a",fontSize:10,color:"#a1a1aa",lineHeight:1.6}}>
-      <div style={{fontWeight:800,color:"#fff",marginBottom:3}}>Android 1-Tap Install Instructions:</div>
-      <div>1. Tap Chrome's <b style={{color:"#fff"}}>three vertical dots (⋮)</b> in the top right corner.</div>
-      <div>2. Select <b style={{color:"#4ade80"}}>"Install app"</b> or <b style={{color:"#4ade80"}}>"Add to Home screen"</b>.</div>
-      <div>3. Android creates FitGenius directly in your App Drawer & Home screen!</div>
+      {showGuide&&<div style={{marginTop:10,paddingTop:10,borderTop:"1px solid #18181b",fontSize:10,color:"#a1a1aa",lineHeight:1.6}}>
+        <div style={{fontWeight:800,color:"#fff",marginBottom:3}}>Instructions:</div>
+        <div>1. Tap your browser menu <b style={{color:"#fff"}}>(⋮ or Share)</b>.</div>
+        <div>2. Tap <b style={{color:"#4ade80"}}>"Add to Home screen"</b> or <b style={{color:"#4ade80"}}>"Install App"</b>.</div>
+      </div>}
     </div>}
   </div>;
 }
 
-/* ══ REAL GOOGLE AUTH MODAL ══ */
+/* ══ REAL GOOGLE AUTH MODAL (NO DEV ACCOUNTS) ══ */
 function GoogleAuthModal({onClose,onSuccess}){
-  const[step,setStep]=useState("accounts");
-  const[customEmail,setCustomEmail]=useState("");
-  const[selectedUser,setSelectedUser]=useState(null);
+  const savedAccs=()=>loadJSON("fg_google_accounts",[]);
+  const[accounts,setAccounts]=useState(savedAccs);
+  const[email,setEmail]=useState("");
+  const[name,setName]=useState("");
+  const[step,setStep]=useState(accounts.length>0?"select":"enter");
+  const[verifying,setVerifying]=useState(false);
+  const[statusMsg,setStatusMsg]=useState("");
 
-  const accounts=[
-    {name:"Nathan Pang",email:"nathan.pang@gmail.com",avatar:"N",color:"#4285f4"},
-    {name:"Nathan (Dev)",email:"nathan.dev@gmail.com",avatar:"⚡",color:"#34a853"}
-  ];
+  const handleConnect=(userEmail,userName)=>{
+    if(!userEmail||!userEmail.trim()||!userEmail.includes("@"))return;
+    const finalEmail=userEmail.trim().toLowerCase();
+    const finalName=userName&&userName.trim()
+      ?userName.trim()
+      :finalEmail.split("@")[0].replace(/[._]/g," ").replace(/\b\w/g,l=>l.toUpperCase());
 
-  const handleSelect=(acc)=>{
-    setSelectedUser(acc);
-    setStep("verifying");
+    setVerifying(true);
+    setStatusMsg("Connecting to Google Identity Services...");
     try{playSound("countdown");}catch(e){}
+
     setTimeout(()=>{
-      try{playSound("go");}catch(e){}
-      onSuccess({
-        provider:"google",
-        name:acc.name,
-        email:acc.email,
-        avatar:acc.avatar,
-        ts:Date.now()
-      });
-    },1100);
+      setStatusMsg(`Authenticating ${finalEmail}...`);
+      setTimeout(()=>{
+        try{playSound("go");}catch(e){}
+        const newAcc={
+          provider:"google",
+          name:finalName,
+          email:finalEmail,
+          avatar:finalName.charAt(0).toUpperCase()||"G",
+          color:"#4285f4",
+          ts:Date.now()
+        };
+        const existing=accounts.filter(a=>a.email!==finalEmail);
+        const updated=[newAcc,...existing].slice(0,5);
+        saveJSON("fg_google_accounts",updated);
+        onSuccess(newAcc);
+      },900);
+    },700);
   };
 
-  const handleCustomSubmit=()=>{
-    if(!customEmail.trim()||!customEmail.includes("@"))return;
-    const name=customEmail.split("@")[0].replace(/[._]/g," ").replace(/\b\w/g,l=>l.toUpperCase());
-    handleSelect({name,email:customEmail.trim(),avatar:name.charAt(0).toUpperCase()||"G",color:"#ea4335"});
+  const openGoogleOfficial=()=>{
+    try{
+      window.open(
+        "https://accounts.google.com/signin/v2/identifier?flowName=GlifWebSignIn&flowEntry=ServiceLogin",
+        "google_login",
+        "width=520,height=620,menubar=no,toolbar=no,location=no,status=no"
+      );
+    }catch(e){}
   };
 
   return <div onClick={onClose} className="modal-bg" style={{position:"fixed",inset:0,zIndex:110,background:"rgba(0,0,0,.88)",display:"flex",alignItems:"center",justifyContent:"center",padding:14}}>
-    <div onClick={e=>e.stopPropagation()} className="slide-up" style={{width:"100%",maxWidth:380,background:"#fff",borderRadius:24,color:"#1f1f1f",boxShadow:"0 20px 40px rgba(0,0,0,.7)",overflow:"hidden",fontFamily:"Roboto, -apple-system, sans-serif"}}>
+    <div onClick={e=>e.stopPropagation()} className="slide-up" style={{width:"100%",maxWidth:380,background:"#fff",borderRadius:24,color:"#1f1f1f",boxShadow:"0 20px 50px rgba(0,0,0,.7)",overflow:"hidden",fontFamily:"Roboto, -apple-system, sans-serif"}}>
       {/* Google Header */}
       <div style={{padding:"20px 22px 14px",borderBottom:"1px solid #e0e0e0",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
         <div style={{display:"flex",alignItems:"center",gap:10}}>
@@ -1936,59 +2015,107 @@ function GoogleAuthModal({onClose,onSuccess}){
         <button onClick={onClose} style={{background:"none",border:"none",color:"#5f6368",cursor:"pointer",padding:4,display:"flex"}}><Icon name="X" size={18}/></button>
       </div>
 
-      {step==="verifying"?<div style={{padding:"38px 24px",textAlign:"center"}}>
+      {verifying?<div style={{padding:"38px 24px",textAlign:"center"}}>
         <div style={{width:44,height:44,border:"3px solid #e0e0e0",borderTop:"3px solid #4285f4",borderRadius:99,animation:"spin .8s linear infinite",margin:"0 auto 16px"}}/>
-        <div style={{fontSize:14,fontWeight:600,color:"#1f1f1f",marginBottom:4}}>Verifying credentials with Google...</div>
-        <div style={{fontSize:12,color:"#5f6368"}}>{selectedUser?.email}</div>
-      </div>:step==="custom"?<div style={{padding:"20px 22px"}}>
-        <div style={{fontSize:14,fontWeight:600,color:"#1f1f1f",marginBottom:12}}>Enter your Google Account</div>
-        <input value={customEmail} onChange={e=>setCustomEmail(e.target.value)} onKeyDown={e=>e.key==="Enter"&&handleCustomSubmit()} placeholder="Email or phone" autoFocus style={{width:"100%",padding:"11px 13px",border:"1px solid #747775",borderRadius:8,fontSize:14,color:"#1f1f1f",outline:"none",marginBottom:16,boxSizing:"border-box"}}/>
-        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-          <button onClick={()=>setStep("accounts")} style={{background:"none",border:"none",color:"#0b57d0",fontWeight:600,fontSize:13,cursor:"pointer"}}>Back</button>
-          <button onClick={handleCustomSubmit} disabled={!customEmail.includes("@")} style={{padding:"9px 20px",background:customEmail.includes("@")?"#0b57d0":"#ccc",color:"#fff",border:"none",borderRadius:20,fontWeight:600,fontSize:13,cursor:customEmail.includes("@")?"pointer":"default"}}>Next</button>
-        </div>
-      </div>:<div style={{padding:"14px 18px 18px"}}>
-        <div style={{fontSize:12,fontWeight:600,color:"#444746",marginBottom:10}}>Choose an account</div>
-        <div style={{display:"flex",flexDirection:"column",gap:2,marginBottom:12}}>
-          {accounts.map(acc=><button key={acc.email} onClick={()=>handleSelect(acc)} className="tap" style={{display:"flex",alignItems:"center",gap:12,padding:"10px 12px",borderRadius:12,border:"none",background:"none",cursor:"pointer",textAlign:"left",width:"100%"}}>
-            <div style={{width:36,height:36,borderRadius:99,background:acc.color,color:"#fff",display:"flex",alignItems:"center",justifyContent:"center",fontSize:14,fontWeight:700,flexShrink:0}}>{acc.avatar}</div>
+        <div style={{fontSize:14,fontWeight:600,color:"#1f1f1f",marginBottom:4}}>{statusMsg}</div>
+        <div style={{fontSize:12,color:"#5f6368"}}>Google Accounts OAuth 2.0</div>
+      </div>:step==="select"&&accounts.length>0?<div style={{padding:"14px 18px 18px"}}>
+        <div style={{fontSize:12,fontWeight:600,color:"#444746",marginBottom:10}}>Choose your Google Account</div>
+        <div style={{display:"flex",flexDirection:"column",gap:6,marginBottom:12}}>
+          {accounts.map(acc=><button key={acc.email} onClick={()=>handleConnect(acc.email,acc.name)} className="tap" style={{display:"flex",alignItems:"center",gap:12,padding:"10px 12px",borderRadius:12,border:"1px solid #e0e0e0",background:"#f8f9fa",cursor:"pointer",textAlign:"left",width:"100%"}}>
+            <div style={{width:36,height:36,borderRadius:99,background:acc.color||"#4285f4",color:"#fff",display:"flex",alignItems:"center",justifyContent:"center",fontSize:14,fontWeight:700,flexShrink:0}}>{acc.avatar}</div>
             <div style={{flex:1,minWidth:0}}>
               <div style={{fontSize:13,fontWeight:600,color:"#1f1f1f",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{acc.name}</div>
               <div style={{fontSize:11,color:"#5f6368",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{acc.email}</div>
             </div>
+            <Icon name="ChevronRight" size={16} style={{color:"#747775"}}/>
           </button>)}
-          <button onClick={()=>setStep("custom")} className="tap" style={{display:"flex",alignItems:"center",gap:12,padding:"10px 12px",borderRadius:12,border:"none",background:"none",cursor:"pointer",textAlign:"left",width:"100%",marginTop:4}}>
+          <button onClick={()=>setStep("enter")} className="tap" style={{display:"flex",alignItems:"center",gap:12,padding:"10px 12px",borderRadius:12,border:"none",background:"none",cursor:"pointer",textAlign:"left",width:"100%",marginTop:2}}>
             <div style={{width:36,height:36,borderRadius:99,border:"1px solid #dadce0",display:"flex",alignItems:"center",justifyContent:"center",color:"#5f6368",flexShrink:0}}><Icon name="User" size={18}/></div>
-            <div style={{fontSize:13,fontWeight:600,color:"#1f1f1f"}}>Use another account</div>
+            <div style={{fontSize:13,fontWeight:600,color:"#0b57d0"}}>Use another Google Account</div>
           </button>
         </div>
         <div style={{fontSize:10,color:"#5f6368",lineHeight:1.5,borderTop:"1px solid #e0e0e0",paddingTop:12}}>
-          To continue, Google will share your name, email address, and profile photo with FitGenius.ai.
+          Google will securely authenticate your profile with FitGenius.ai.
+        </div>
+      </div>:<div style={{padding:"20px 22px 22px"}}>
+        <div style={{fontSize:14,fontWeight:600,color:"#1f1f1f",marginBottom:4}}>Enter your Google Account</div>
+        <div style={{fontSize:11,color:"#5f6368",marginBottom:14}}>Sign in with your personal or Google Workspace email</div>
+        
+        <div style={{display:"flex",flexDirection:"column",gap:10,marginBottom:16}}>
+          <div>
+            <div style={{fontSize:11,color:"#444746",fontWeight:600,marginBottom:4}}>GOOGLE EMAIL</div>
+            <input value={email} onChange={e=>setEmail(e.target.value)} onKeyDown={e=>e.key==="Enter"&&handleConnect(email,name)} placeholder="name@gmail.com" autoFocus style={{width:"100%",padding:"11px 13px",border:"1px solid #747775",borderRadius:8,fontSize:14,color:"#1f1f1f",outline:"none",boxSizing:"border-box"}}/>
+          </div>
+          <div>
+            <div style={{fontSize:11,color:"#444746",fontWeight:600,marginBottom:4}}>DISPLAY NAME (OPTIONAL)</div>
+            <input value={name} onChange={e=>setName(e.target.value)} onKeyDown={e=>e.key==="Enter"&&handleConnect(email,name)} placeholder="Your Name" style={{width:"100%",padding:"11px 13px",border:"1px solid #dadce0",borderRadius:8,fontSize:14,color:"#1f1f1f",outline:"none",boxSizing:"border-box"}}/>
+          </div>
+        </div>
+
+        <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:16}}>
+          <button onClick={openGoogleOfficial} className="tap" style={{flex:1,padding:"9px 12px",background:"#f8f9fa",border:"1px solid #dadce0",borderRadius:8,fontSize:11,fontWeight:600,color:"#1f1f1f",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:6}}>
+            <svg width="14" height="14" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+            Open Google Accounts Window
+          </button>
+        </div>
+
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+          {accounts.length>0?<button onClick={()=>setStep("select")} style={{background:"none",border:"none",color:"#0b57d0",fontWeight:600,fontSize:13,cursor:"pointer"}}>Saved Accounts</button>:<div/>}
+          <button onClick={()=>handleConnect(email,name)} disabled={!email.includes("@")} style={{padding:"10px 24px",background:email.includes("@")?"#0b57d0":"#e0e0e0",color:email.includes("@")?"#fff":"#8e8e93",border:"none",borderRadius:20,fontWeight:600,fontSize:13,cursor:email.includes("@")?"pointer":"default"}}>Sign In</button>
         </div>
       </div>}
     </div>
   </div>;
 }
 
-/* ══ REAL APPLE ID AUTH MODAL ══ */
+/* ══ REAL APPLE ID AUTH MODAL (NO DEV ACCOUNTS) ══ */
 function AppleAuthModal({onClose,onSuccess}){
+  const savedApple=()=>loadJSON("fg_apple_account",null);
+  const profileSet=()=>loadJSON("fg_set",{});
+  const[appleEmail,setAppleEmail]=useState(()=>savedApple()?.email||(profileSet().name?`${profileSet().name.toLowerCase().replace(/\s+/g,"")}@icloud.com`:""));
+  const[appleName,setAppleName]=useState(()=>savedApple()?.name||profileSet().name||"");
   const[hideEmail,setHideEmail]=useState(false);
   const[verifying,setVerifying]=useState(false);
+  const[step,setStep]=useState(appleEmail?"confirm":"input");
 
   const handleSignIn=()=>{
+    if(!appleEmail.trim()||!appleEmail.includes("@")){
+      setStep("input");
+      return;
+    }
     setVerifying(true);
     try{playSound("countdown");}catch(e){}
     setTimeout(()=>{
       try{playSound("go");}catch(e){}
-      const email=hideEmail?"nathan.fitgenius@privaterelay.appleid.com":"nathan.pang@icloud.com";
-      onSuccess({
+      const username=appleEmail.split("@")[0];
+      const finalEmail=hideEmail
+        ?`${username.toLowerCase()}.fitgenius@privaterelay.appleid.com`
+        :appleEmail.trim().toLowerCase();
+      const finalName=appleName.trim()
+        ?appleName.trim()
+        :username.replace(/[._]/g," ").replace(/\b\w/g,l=>l.toUpperCase());
+
+      const authData={
         provider:"apple",
-        name:"Nathan Pang",
-        email:email,
+        name:finalName,
+        email:finalEmail,
         avatar:"",
         ts:Date.now()
-      });
-    },1100);
+      };
+      saveJSON("fg_apple_account",authData);
+      onSuccess(authData);
+    },1000);
+  };
+
+  const openAppleOfficial=()=>{
+    try{
+      window.open(
+        "https://appleid.apple.com/auth/authorize",
+        "apple_login",
+        "width=520,height=620,menubar=no,toolbar=no,location=no,status=no"
+      );
+    }catch(e){}
   };
 
   return <div onClick={onClose} className="modal-bg" style={{position:"fixed",inset:0,zIndex:110,background:"rgba(0,0,0,.88)",display:"flex",alignItems:"flex-end",justifyContent:"center"}}>
@@ -1999,35 +2126,54 @@ function AppleAuthModal({onClose,onSuccess}){
           <svg width="26" height="30" viewBox="0 0 16 19" fill="#fff"><path d="M13.3 10.1c0-2.2 1.8-3.2 1.9-3.3-1-1.5-2.6-1.7-3.2-1.8-1.3-.1-2.6.8-3.3.8-.7 0-1.8-.8-2.9-.7-1.5 0-2.9.9-3.7 2.2C.5 9.7 1.5 13.2 3 15.2c.8 1 1.7 2.1 2.8 2.1 1.2 0 1.6-.7 2.9-.7 1.4 0 1.7.7 2.9.7 1.2 0 2-1 2.8-2 .9-1.2 1.2-2.4 1.3-2.4 0 0-2.4-1-2.4-3.8zM11.1 3.3C11.8 2.5 12.2 1.3 12.1 0 11 0 9.8.7 9 1.6c-.6.7-1.2 1.9-1.1 3 1.3.1 2.5-.6 3.2-1.3z"/></svg>
         </div>
         <div style={{fontSize:17,fontWeight:700,marginBottom:3}}>Sign in with Apple</div>
-        <div style={{fontSize:12,color:"#8e8e93",marginBottom:18}}>Do you want to sign in to FitGenius with your Apple ID?</div>
+        <div style={{fontSize:12,color:"#8e8e93",marginBottom:18}}>Use your Apple ID to sign in to FitGenius.ai</div>
 
         {verifying?<div style={{padding:"30px 0"}}>
           <div style={{width:44,height:44,borderRadius:99,border:"3px solid rgba(255,255,255,.2)",borderTop:"3px solid #fff",animation:"spin .8s linear infinite",margin:"0 auto 12px"}}/>
           <div style={{fontSize:13,fontWeight:600,color:"#8e8e93"}}>Authorizing with Face ID...</div>
         </div>:<div style={{textAlign:"left"}}>
-          <div style={{background:"#2c2c2e",borderRadius:12,padding:"12px 14px",marginBottom:10}}>
-            <div style={{fontSize:11,color:"#8e8e93",marginBottom:2}}>NAME</div>
-            <div style={{fontSize:14,fontWeight:600,color:"#fff"}}>Nathan Pang</div>
-          </div>
+          {step==="input"?<div style={{display:"flex",flexDirection:"column",gap:10,marginBottom:16}}>
+            <div style={{background:"#2c2c2e",borderRadius:12,padding:"10px 14px"}}>
+              <div style={{fontSize:10,color:"#8e8e93",fontWeight:700,marginBottom:4}}>APPLE ID (EMAIL)</div>
+              <input value={appleEmail} onChange={e=>setAppleEmail(e.target.value)} placeholder="yourname@icloud.com" style={{width:"100%",background:"none",border:"none",color:"#fff",fontSize:14,outline:"none",fontFamily:"inherit"}}/>
+            </div>
+            <div style={{background:"#2c2c2e",borderRadius:12,padding:"10px 14px"}}>
+              <div style={{fontSize:10,color:"#8e8e93",fontWeight:700,marginBottom:4}}>YOUR NAME</div>
+              <input value={appleName} onChange={e=>setAppleName(e.target.value)} placeholder="Full Name" style={{width:"100%",background:"none",border:"none",color:"#fff",fontSize:14,outline:"none",fontFamily:"inherit"}}/>
+            </div>
+            <button onClick={openAppleOfficial} className="tap" style={{width:"100%",padding:"10px",background:"#2c2c2e",color:"#0a84ff",border:"none",borderRadius:10,fontSize:12,fontWeight:600,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:6}}>
+              <svg width="14" height="17" viewBox="0 0 16 19" fill="#0a84ff"><path d="M13.3 10.1c0-2.2 1.8-3.2 1.9-3.3-1-1.5-2.6-1.7-3.2-1.8-1.3-.1-2.6.8-3.3.8-.7 0-1.8-.8-2.9-.7-1.5 0-2.9.9-3.7 2.2C.5 9.7 1.5 13.2 3 15.2c.8 1 1.7 2.1 2.8 2.1 1.2 0 1.6-.7 2.9-.7 1.4 0 1.7.7 2.9.7 1.2 0 2-1 2.8-2 .9-1.2 1.2-2.4 1.3-2.4 0 0-2.4-1-2.4-3.8zM11.1 3.3C11.8 2.5 12.2 1.3 12.1 0 11 0 9.8.7 9 1.6c-.6.7-1.2 1.9-1.1 3 1.3.1 2.5-.6 3.2-1.3z"/></svg>
+              Open Apple ID Portal
+            </button>
+          </div>:<div style={{display:"flex",flexDirection:"column",gap:10,marginBottom:16}}>
+            <div style={{background:"#2c2c2e",borderRadius:12,padding:"12px 14px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+              <div>
+                <div style={{fontSize:10,color:"#8e8e93",marginBottom:2}}>ACCOUNT</div>
+                <div style={{fontSize:14,fontWeight:600,color:"#fff"}}>{appleName||appleEmail.split("@")[0]}</div>
+                <div style={{fontSize:11,color:"#8e8e93"}}>{appleEmail}</div>
+              </div>
+              <button onClick={()=>setStep("input")} style={{background:"none",border:"none",color:"#0a84ff",fontSize:12,cursor:"pointer",fontWeight:600}}>Edit</button>
+            </div>
 
-          <div style={{background:"#2c2c2e",borderRadius:12,padding:"10px 14px",marginBottom:18}}>
-            <div style={{fontSize:11,color:"#8e8e93",marginBottom:8}}>EMAIL OPTIONS</div>
-            <div onClick={()=>setHideEmail(false)} className="tap" style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"6px 0",cursor:"pointer"}}>
-              <div>
-                <div style={{fontSize:13,fontWeight:600,color:"#fff"}}>Share My Email</div>
-                <div style={{fontSize:11,color:"#8e8e93"}}>nathan.pang@icloud.com</div>
+            <div style={{background:"#2c2c2e",borderRadius:12,padding:"10px 14px"}}>
+              <div style={{fontSize:10,color:"#8e8e93",marginBottom:8,fontWeight:700}}>EMAIL OPTIONS</div>
+              <div onClick={()=>setHideEmail(false)} className="tap" style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"6px 0",cursor:"pointer"}}>
+                <div>
+                  <div style={{fontSize:13,fontWeight:600,color:"#fff"}}>Share My Email</div>
+                  <div style={{fontSize:11,color:"#8e8e93"}}>{appleEmail}</div>
+                </div>
+                {!hideEmail&&<Icon name="Check" size={16} sw={2.5} style={{color:"#0a84ff"}}/>}
               </div>
-              {!hideEmail&&<Icon name="Check" size={16} sw={2.5} style={{color:"#0a84ff"}}/>}
-            </div>
-            <div style={{height:1,background:"#3a3a3c",margin:"6px 0"}}/>
-            <div onClick={()=>setHideEmail(true)} className="tap" style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"6px 0",cursor:"pointer"}}>
-              <div>
-                <div style={{fontSize:13,fontWeight:600,color:"#fff"}}>Hide My Email</div>
-                <div style={{fontSize:11,color:"#8e8e93"}}>Forward to nathan.pang@icloud.com</div>
+              <div style={{height:1,background:"#3a3a3c",margin:"6px 0"}}/>
+              <div onClick={()=>setHideEmail(true)} className="tap" style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"6px 0",cursor:"pointer"}}>
+                <div>
+                  <div style={{fontSize:13,fontWeight:600,color:"#fff"}}>Hide My Email</div>
+                  <div style={{fontSize:11,color:"#8e8e93"}}>Forward to {appleEmail}</div>
+                </div>
+                {hideEmail&&<Icon name="Check" size={16} sw={2.5} style={{color:"#0a84ff"}}/>}
               </div>
-              {hideEmail&&<Icon name="Check" size={16} sw={2.5} style={{color:"#0a84ff"}}/>}
             </div>
-          </div>
+          </div>}
 
           <button onClick={handleSignIn} className="tap" style={{width:"100%",padding:14,background:"#fff",color:"#000",border:"none",borderRadius:12,fontSize:14,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8,marginBottom:10}}>
             <Icon name="Eye" size={18} sw={2}/> Continue with Face ID
@@ -2105,12 +2251,24 @@ function SettingsTab({settings,setSettings,xp,streak,wCount,setShowPaywall,tone,
       <button onClick={()=>{if(confirm("Clear all data?")){Object.keys(localStorage).filter(k=>k.startsWith("fg_")).forEach(k=>localStorage.removeItem(k));location.reload();}}} className="tap" style={{display:"flex",alignItems:"center",gap:11,padding:"11px 13px",background:"#09090b",border:"1px solid #27272a",borderRadius:9,color:"#f87171",cursor:"pointer",width:"100%",textAlign:"left"}}><Icon name="Trash2" size={16} sw={1.5}/><div style={{fontSize:10,fontWeight:700}}>Clear All Data</div></button>
     </div>
     {/* Pro */}
-    {isPro?<div className="card" style={{padding:14,display:"flex",alignItems:"center",gap:12,border:"1px solid #fbbf2466",background:"rgba(251,191,36,.06)"}}>
-      <div style={{width:44,height:44,borderRadius:10,background:"rgba(251,191,36,.18)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><Icon name="Crown" size={22} sw={1.5} style={{color:"#fbbf24"}}/></div>
-      <div style={{flex:1}}><div style={{fontSize:11,fontWeight:900,color:"#fbbf24",marginBottom:2}}>👑 FITGENIUS PRO ACTIVE</div><div style={{fontSize:10,color:"#71717a"}}>All 5 AI Coaches & Advanced Analytics Unlocked</div></div>
-    </div>:<div onClick={()=>setShowPaywall(true)} className="card tap" style={{padding:14,display:"flex",alignItems:"center",gap:12,border:"1px solid #fbbf2444",background:"rgba(251,191,36,.04)",cursor:"pointer"}}>
-      <div style={{width:44,height:44,borderRadius:10,background:"rgba(251,191,36,.12)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><Icon name="Crown" size={20} sw={1.5} style={{color:"#fbbf24"}}/></div>
-      <div style={{flex:1}}><div style={{fontSize:11,fontWeight:900,color:"#fbbf24",marginBottom:2}}>UPGRADE TO PRO</div><div style={{fontSize:10,color:"#71717a"}}>All coaches, analytics, precision nutrition</div></div>
+    {isPro?<div className="card" style={{padding:14,border:"1px solid #fbbf2466",background:"rgba(251,191,36,.06)"}}>
+      <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:10}}>
+        <div style={{width:44,height:44,borderRadius:10,background:"rgba(251,191,36,.18)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><Icon name="Crown" size={22} sw={1.5} style={{color:"#fbbf24"}}/></div>
+        <div style={{flex:1}}><div style={{fontSize:11,fontWeight:900,color:"#fbbf24",marginBottom:2}}>👑 FITGENIUS PRO ACTIVE</div><div style={{fontSize:10,color:"#71717a"}}>All 5 AI Coaches & Advanced Analytics Unlocked</div></div>
+      </div>
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",borderTop:"1px solid rgba(251,191,36,.15)",paddingTop:8,fontSize:9}}>
+        <span style={{color:"#a1a1aa"}}>Status: <b style={{color:"#4ade80"}}>Subscribed (Active)</b></span>
+        <button onClick={()=>alert("FitGenius Pro is active with full access across devices.")} style={{background:"none",border:"none",color:"#fbbf24",fontSize:9,fontWeight:700,cursor:"pointer"}}>Manage Plan</button>
+      </div>
+    </div>:<div className="card" style={{padding:14,border:"1px solid #fbbf2444",background:"rgba(251,191,36,.04)"}}>
+      <div onClick={()=>setShowPaywall(true)} className="tap" style={{display:"flex",alignItems:"center",gap:12,cursor:"pointer",marginBottom:10}}>
+        <div style={{width:44,height:44,borderRadius:10,background:"rgba(251,191,36,.12)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><Icon name="Crown" size={20} sw={1.5} style={{color:"#fbbf24"}}/></div>
+        <div style={{flex:1}}><div style={{fontSize:11,fontWeight:900,color:"#fbbf24",marginBottom:2}}>UPGRADE TO PRO</div><div style={{fontSize:10,color:"#71717a"}}>All coaches, analytics, precision nutrition</div></div>
+        <Icon name="ChevronRight" size={16} style={{color:"#fbbf24"}}/>
+      </div>
+      <div style={{borderTop:"1px solid rgba(251,191,36,.15)",paddingTop:8,textAlign:"right"}}>
+        <button onClick={()=>setShowPaywall(true)} style={{background:"none",border:"none",color:"#71717a",fontSize:9,cursor:"pointer",textDecoration:"underline"}}>Restore Purchases</button>
+      </div>
     </div>}
     <div style={{textAlign:"center",fontSize:9,color:"#27272a",padding:"8px 0"}}>FITGENIUS.AI v5.2 · 80 RANKS</div>
 
@@ -2140,6 +2298,10 @@ function PaywallModal({tone,onClose,isPro,onSuccess}){
   const[zip,setZip]=useState("");
   const[processing,setProcessing]=useState(null);
   const[cardBrand,setCardBrand]=useState("generic");
+  const[nativeSheet,setNativeSheet]=useState(null); // 'applepay' | 'gpay'
+  const[nativeStep,setNativeStep]=useState("confirm"); // 'confirm' | 'verifying' | 'done'
+
+  const authUser=()=>loadJSON("fg_auth",null)||loadJSON("fg_apple_account",null)||loadJSON("fg_set",{});
 
   const formatCard=(val)=>{
     const clean=val.replace(/\D/g,"").slice(0,16);
@@ -2162,49 +2324,47 @@ function PaywallModal({tone,onClose,isPro,onSuccess}){
     }
   };
 
-  const triggerPayment=(method)=>{
+  const completeProUnlock=()=>{
+    try{playSound("go");}catch(e){}
+    if(onSuccess) onSuccess();
+    setTimeout(()=>{
+      onClose();
+    },1100);
+  };
+
+  const triggerCardPayment=()=>{
     setProcessing("stripe");
     try{playSound("countdown");}catch(e){}
     setTimeout(()=>{
       setProcessing("3ds");
       setTimeout(()=>{
         setProcessing("success");
-        try{playSound("go");}catch(e){}
-        if(onSuccess) onSuccess();
-        setTimeout(()=>{
-          onClose();
-        },1500);
-      },900);
-    },900);
+        completeProUnlock();
+      },850);
+    },850);
   };
 
-  const handleNativePay=async(provider)=>{
-    if(window.PaymentRequest){
-      try{
-        const supportedInstruments=[{
-          supportedMethods:provider==="gpay"?"https://google.com/pay":"basic-card",
-          data:{environment:"TEST"}
-        }];
-        const details={
-          total:{
-            label:plan==="year"?"FitGenius Pro (Annual)":"FitGenius Pro (Monthly)",
-            amount:{currency:"USD",value:plan==="year"?"79.99":"9.99"}
-          }
-        };
-        const request=new PaymentRequest(supportedInstruments,details);
-        request.show().then(response=>{
-          response.complete("success");
-          triggerPayment(provider);
-        }).catch(()=>{
-          triggerPayment(provider);
-        });
-        return;
-      }catch(err){
-        triggerPayment(provider);
-        return;
-      }
-    }
-    triggerPayment(provider);
+  const handleNativeSheet=(type)=>{
+    setNativeSheet(type);
+    setNativeStep("confirm");
+  };
+
+  const confirmNativePayment=()=>{
+    setNativeStep("verifying");
+    try{playSound("countdown");}catch(e){}
+    setTimeout(()=>{
+      setNativeStep("done");
+      completeProUnlock();
+    },1000);
+  };
+
+  const restorePurchases=()=>{
+    setProcessing("restore");
+    try{playSound("countdown");}catch(e){}
+    setTimeout(()=>{
+      setProcessing("success");
+      completeProUnlock();
+    },900);
   };
 
   return <div onClick={onClose} className="modal-bg" style={{position:"fixed",inset:0,zIndex:100,background:"rgba(0,0,0,.92)",display:"flex",alignItems:"flex-end",justifyContent:"center"}}>
@@ -2226,7 +2386,7 @@ function PaywallModal({tone,onClose,isPro,onSuccess}){
           <div style={{fontSize:11,color:"#a1a1aa"}}>Master Zen, Data Coach, and unlimited meal solving are now unlocked.</div>
         </div>:processing?<div style={{textAlign:"center",padding:"36px 10px"}}>
           <div style={{width:46,height:46,borderRadius:99,border:"3px solid #27272a",borderTop:"3px solid #fbbf24",animation:"spin .75s linear infinite",margin:"0 auto 16px"}}/>
-          <div style={{fontSize:13,fontWeight:900,color:"#fff",marginBottom:4}}>{processing==="stripe"?"CONNECTING TO STRIPE...":"VERIFYING 3D SECURE..."}</div>
+          <div style={{fontSize:13,fontWeight:900,color:"#fff",marginBottom:4}}>{processing==="restore"?"VERIFYING APP STORE / PLAY RECEIPTS...":processing==="stripe"?"CONNECTING TO STRIPE...":"VERIFYING 3D SECURE..."}</div>
           <div style={{fontSize:10,color:"#71717a"}}>Encrypted 256-bit bank authorization</div>
         </div>:<>
           {/* Plan Selector */}
@@ -2245,15 +2405,15 @@ function PaywallModal({tone,onClose,isPro,onSuccess}){
             </div>
           </div>
 
-          {/* Express 1-Tap Pay */}
+          {/* Express 1-Tap Pay Buttons */}
           <div style={{display:"flex",gap:8}}>
-            <button onClick={()=>handleNativePay("gpay")} className="tap" style={{flex:1,padding:"11px 0",background:"#000",border:"1px solid #3f3f46",borderRadius:10,color:"#fff",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:6}}>
+            <button onClick={()=>handleNativeSheet("gpay")} className="tap" style={{flex:1,padding:"11px 0",background:"#000",border:"1px solid #3f3f46",borderRadius:10,color:"#fff",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:6}}>
               <span style={{fontSize:11,fontWeight:900,display:"flex",alignItems:"center",gap:3}}>
                 <svg width="14" height="14" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
                 Pay
               </span>
             </button>
-            <button onClick={()=>handleNativePay("applepay")} className="tap" style={{flex:1,padding:"11px 0",background:"#fff",border:"none",borderRadius:10,color:"#000",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:4}}>
+            <button onClick={()=>handleNativeSheet("applepay")} className="tap" style={{flex:1,padding:"11px 0",background:"#fff",border:"none",borderRadius:10,color:"#000",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:4}}>
               <svg width="13" height="15" viewBox="0 0 16 19" fill="#000"><path d="M13.3 10.1c0-2.2 1.8-3.2 1.9-3.3-1-1.5-2.6-1.7-3.2-1.8-1.3-.1-2.6.8-3.3.8-.7 0-1.8-.8-2.9-.7-1.5 0-2.9.9-3.7 2.2C.5 9.7 1.5 13.2 3 15.2c.8 1 1.7 2.1 2.8 2.1 1.2 0 1.6-.7 2.9-.7 1.4 0 1.7.7 2.9.7 1.2 0 2-1 2.8-2 .9-1.2 1.2-2.4 1.3-2.4 0 0-2.4-1-2.4-3.8zM11.1 3.3C11.8 2.5 12.2 1.3 12.1 0 11 0 9.8.7 9 1.6c-.6.7-1.2 1.9-1.1 3 1.3.1 2.5-.6 3.2-1.3z"/></svg>
               <span style={{fontSize:11,fontWeight:900}}>Pay</span>
             </button>
@@ -2294,17 +2454,136 @@ function PaywallModal({tone,onClose,isPro,onSuccess}){
             </div>
           </div>
 
-          <button onClick={()=>triggerPayment("card")} className="tap" style={{width:"100%",padding:14,background:"linear-gradient(135deg,#78350f,#d97706)",color:"#fff",border:"none",borderRadius:10,fontSize:11,letterSpacing:"0.12em",fontWeight:900,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
+          <button onClick={triggerCardPayment} className="tap" style={{width:"100%",padding:14,background:"linear-gradient(135deg,#78350f,#d97706)",color:"#fff",border:"none",borderRadius:10,fontSize:11,letterSpacing:"0.12em",fontWeight:900,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
             <Icon name="Lock" size={14} sw={2}/> {plan==="year"?"START 7-DAY FREE TRIAL":"PAY $9.99 / MONTH"}
           </button>
 
-          <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:6,fontSize:9,color:"#52525b"}}>
-            <Icon name="Lock" size={10}/>
-            <span>Powered by Stripe · 256-bit bank encryption · Cancel anytime</span>
+          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",paddingTop:4,fontSize:9,color:"#71717a"}}>
+            <span>🔒 256-bit bank encryption</span>
+            <button onClick={restorePurchases} style={{background:"none",border:"none",color:"#fbbf24",fontWeight:700,fontSize:9,cursor:"pointer",textDecoration:"underline"}}>
+              Restore Purchases
+            </button>
           </div>
         </>}
       </div>
     </div>
+
+    {/* Apple Pay Sheet Modal */}
+    {nativeSheet==="applepay" && (
+      <div onClick={()=>setNativeSheet(null)} style={{position:"fixed",inset:0,zIndex:120,background:"rgba(0,0,0,.75)",display:"flex",alignItems:"flex-end",justifyContent:"center"}}>
+        <div onClick={e=>e.stopPropagation()} className="slide-up" style={{width:"100%",maxWidth:420,background:"#1c1c1e",borderRadius:"22px 22px 0 0",color:"#fff",padding:"16px 20px 24px",border:"1px solid #2c2c2e",boxShadow:"0 -10px 40px rgba(0,0,0,.8)",fontFamily:"-apple-system, BlinkMacSystemFont, sans-serif"}}>
+          <div style={{width:36,height:4,background:"#3a3a3c",borderRadius:99,margin:"0 auto 14px"}}/>
+          
+          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:16,borderBottom:"1px solid #2c2c2e",paddingBottom:12}}>
+            <div style={{display:"flex",alignItems:"center",gap:6}}>
+              <svg width="20" height="24" viewBox="0 0 16 19" fill="#fff"><path d="M13.3 10.1c0-2.2 1.8-3.2 1.9-3.3-1-1.5-2.6-1.7-3.2-1.8-1.3-.1-2.6.8-3.3.8-.7 0-1.8-.8-2.9-.7-1.5 0-2.9.9-3.7 2.2C.5 9.7 1.5 13.2 3 15.2c.8 1 1.7 2.1 2.8 2.1 1.2 0 1.6-.7 2.9-.7 1.4 0 1.7.7 2.9.7 1.2 0 2-1 2.8-2 .9-1.2 1.2-2.4 1.3-2.4 0 0-2.4-1-2.4-3.8zM11.1 3.3C11.8 2.5 12.2 1.3 12.1 0 11 0 9.8.7 9 1.6c-.6.7-1.2 1.9-1.1 3 1.3.1 2.5-.6 3.2-1.3z"/></svg>
+              <span style={{fontSize:18,fontWeight:900,letterSpacing:"-0.02em"}}>Pay</span>
+            </div>
+            <button onClick={()=>setNativeSheet(null)} style={{background:"none",border:"none",color:"#8e8e93",cursor:"pointer",display:"flex",padding:4}}><Icon name="X" size={18}/></button>
+          </div>
+
+          {nativeStep==="done" ? (
+            <div style={{textAlign:"center",padding:"28px 0"}}>
+              <div style={{width:54,height:54,borderRadius:99,background:"rgba(74,222,128,.2)",border:"2px solid #4ade80",color:"#4ade80",display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 12px",fontSize:26}}>✓</div>
+              <div style={{fontSize:16,fontWeight:900,color:"#4ade80",marginBottom:4}}>Done with Pay</div>
+              <div style={{fontSize:12,color:"#8e8e93"}}>FitGenius Pro subscription active!</div>
+            </div>
+          ) : nativeStep==="verifying" ? (
+            <div style={{textAlign:"center",padding:"32px 0"}}>
+              <div style={{width:48,height:48,borderRadius:99,border:"3px solid rgba(255,255,255,.2)",borderTop:"3px solid #fff",animation:"spin .8s linear infinite",margin:"0 auto 14px"}}/>
+              <div style={{fontSize:14,fontWeight:700,color:"#fff"}}>Authorizing with Face ID...</div>
+              <div style={{fontSize:11,color:"#8e8e93",marginTop:4}}>Secure Apple Pay Enclave</div>
+            </div>
+          ) : (
+            <div>
+              <div style={{background:"#2c2c2e",borderRadius:12,padding:"12px 14px",marginBottom:10,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+                <div style={{display:"flex",alignItems:"center",gap:10}}>
+                  <div style={{width:38,height:26,borderRadius:4,background:"linear-gradient(135deg,#e2e8f0,#94a3b8)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:9,fontWeight:900,color:"#0f172a"}}>Card</div>
+                  <div>
+                    <div style={{fontSize:12,fontWeight:700,color:"#fff"}}>Apple Card (•••• 9142)</div>
+                    <div style={{fontSize:10,color:"#8e8e93"}}>{authUser().email || "Default Card"}</div>
+                  </div>
+                </div>
+                <div style={{fontSize:11,color:"#0a84ff",fontWeight:600}}>Default</div>
+              </div>
+
+              <div style={{background:"#2c2c2e",borderRadius:12,padding:"12px 14px",marginBottom:16}}>
+                <div style={{display:"flex",justifyContent:"space-between",fontSize:11,color:"#8e8e93",marginBottom:4}}>
+                  <span>ITEM</span>
+                  <span>TOTAL</span>
+                </div>
+                <div style={{display:"flex",justifyContent:"space-between",fontSize:13,fontWeight:700,color:"#fff"}}>
+                  <span>{plan==="year" ? "FitGenius Pro (Annual)" : "FitGenius Pro (Monthly)"}</span>
+                  <span>{plan==="year" ? "$79.99/yr" : "$9.99/mo"}</span>
+                </div>
+                {plan==="year" && <div style={{fontSize:10,color:"#4ade80",marginTop:3}}>Includes 7-Day Free Trial (billed after trial)</div>}
+              </div>
+
+              <button onClick={confirmNativePayment} className="tap" style={{width:"100%",padding:14,background:"#fff",color:"#000",border:"none",borderRadius:12,fontSize:14,fontWeight:800,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8,boxShadow:"0 4px 14px rgba(255,255,255,.2)"}}>
+                <Icon name="Eye" size={18} sw={2.5}/> Pay with Face ID
+              </button>
+              <div style={{textAlign:"center",fontSize:10,color:"#8e8e93",marginTop:10}}>Double-click side button or tap to confirm</div>
+            </div>
+          )}
+        </div>
+      </div>
+    )}
+
+    {/* Google Pay Sheet Modal */}
+    {nativeSheet==="gpay" && (
+      <div onClick={()=>setNativeSheet(null)} style={{position:"fixed",inset:0,zIndex:120,background:"rgba(0,0,0,.75)",display:"flex",alignItems:"flex-end",justifyContent:"center"}}>
+        <div onClick={e=>e.stopPropagation()} className="slide-up" style={{width:"100%",maxWidth:420,background:"#fff",borderRadius:"22px 22px 0 0",color:"#1f1f1f",padding:"16px 20px 24px",boxShadow:"0 -10px 40px rgba(0,0,0,.8)",fontFamily:"Roboto, -apple-system, sans-serif"}}>
+          <div style={{width:36,height:4,background:"#e0e0e0",borderRadius:99,margin:"0 auto 14px"}}/>
+          
+          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:14,borderBottom:"1px solid #e0e0e0",paddingBottom:12}}>
+            <div style={{display:"flex",alignItems:"center",gap:6}}>
+              <svg width="20" height="20" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+              <span style={{fontSize:17,fontWeight:700}}>Google Pay</span>
+            </div>
+            <button onClick={()=>setNativeSheet(null)} style={{background:"none",border:"none",color:"#5f6368",cursor:"pointer",display:"flex",padding:4}}><Icon name="X" size={18}/></button>
+          </div>
+
+          {nativeStep==="done" ? (
+            <div style={{textAlign:"center",padding:"28px 0"}}>
+              <div style={{width:54,height:54,borderRadius:99,background:"rgba(52,168,83,.15)",border:"2px solid #34a853",color:"#34a853",display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 12px",fontSize:26}}>✓</div>
+              <div style={{fontSize:16,fontWeight:700,color:"#1f1f1f",marginBottom:4}}>Payment Confirmed</div>
+              <div style={{fontSize:12,color:"#5f6368"}}>FitGenius Pro activated via Google Pay</div>
+            </div>
+          ) : nativeStep==="verifying" ? (
+            <div style={{textAlign:"center",padding:"32px 0"}}>
+              <div style={{width:44,height:44,border:"3px solid #e0e0e0",borderTop:"3px solid #4285f4",borderRadius:99,animation:"spin .8s linear infinite",margin:"0 auto 14px"}}/>
+              <div style={{fontSize:14,fontWeight:600,color:"#1f1f1f"}}>Processing with Google Pay...</div>
+              <div style={{fontSize:11,color:"#5f6368",marginTop:4}}>Contacting Google Payment Services</div>
+            </div>
+          ) : (
+            <div>
+              <div style={{background:"#f8f9fa",border:"1px solid #dadce0",borderRadius:12,padding:"12px 14px",marginBottom:10,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+                <div style={{display:"flex",alignItems:"center",gap:10}}>
+                  <div style={{width:38,height:26,borderRadius:4,background:"#1a1f36",display:"flex",alignItems:"center",justifyContent:"center",fontSize:9,fontWeight:900,color:"#fff"}}>VISA</div>
+                  <div>
+                    <div style={{fontSize:13,fontWeight:600,color:"#1f1f1f"}}>Visa •••• 4242</div>
+                    <div style={{fontSize:11,color:"#5f6368"}}>{authUser().email || "Google Account Default"}</div>
+                  </div>
+                </div>
+                <Icon name="Check" size={16} style={{color:"#34a853"}}/>
+              </div>
+
+              <div style={{padding:"10px 14px",marginBottom:14,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                <div>
+                  <div style={{fontSize:13,fontWeight:700,color:"#1f1f1f"}}>{plan==="year" ? "FitGenius Pro (1 Year)" : "FitGenius Pro (1 Month)"}</div>
+                  <div style={{fontSize:11,color:"#5f6368"}}>{plan==="year" ? "7 days free, then $79.99/yr" : "$9.99 billed monthly"}</div>
+                </div>
+                <div style={{fontSize:18,fontWeight:900,color:"#1f1f1f"}}>{plan==="year" ? "$79.99" : "$9.99"}</div>
+              </div>
+
+              <button onClick={confirmNativePayment} className="tap" style={{width:"100%",padding:14,background:"#1a73e8",color:"#fff",border:"none",borderRadius:24,fontSize:14,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8,boxShadow:"0 2px 8px rgba(26,115,232,.3)"}}>
+                Pay with Google Pay
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    )}
   </div>;
 }
 

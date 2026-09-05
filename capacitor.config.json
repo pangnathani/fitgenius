@@ -1,0 +1,8 @@
+{
+  "appId": "ai.fitgenius.app",
+  "appName": "FitGenius",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  }
+}
